@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Составление заявки</title>
+    <link rel="stylesheet" href="/resources/styles/main.css">
+    <link rel="stylesheet" href="/resources/styles/order.css">
+</head>
+
+<body>
+    
+    <header>
+        <div class="logo">FRAXCALCULATOR.ORG</div>
+        <div><a class="refToMenu" href="/FRAX">Факторы</a></div>
+    </header>
+
+    <div class="header-text">Составление заявки</div>
+    <div class="header-line"></div>
+
+    <div class="container-forms">
+        <div class="form-card">
+            <p class="form-card-title">Введите данные в анкету</p>
+            <form class="form">
+                <label><span>Возраст</span> <input type="text"></label>
+                <label><span>Пол</span> <div class="radio-group"><input type="radio" id="male" name="gender"><label for="male">Мужской</label><input type="radio" id="female" name="gender"><label for="female">Женский</label></div></label>
+                <label><span>Вес</span> <input type="text"> кг</label>
+                <label><span>Рост</span> <input type="text"> см</label>
+            </form>
+        </div>
+        <div class="form-card">
+            <p class="form-card-title">Результат</p>
+            <div class="result-form">
+                <label><span>Остеопоротические переломы</span> <input type="text"></label>
+                <label><span>Перелом шейки бедра</span> <input type="text"></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Ваши карточки здесь -->
+        <div class="card">
+            <p class="card-title">{{.order.Title}}</p>
+            <p class="card-text">{{.order.Text}}</p>
+        </div>
+        <div class="input-card">
+            <textarea placeholder="Введите текст"></textarea>
+        </div>
+    </div>
+
+        <div class="footer-line"></div>
+    <footer>
+        <div><p class="logo logoFooter">FRAXCALCULATOR.ORG</p></div>
+        <div><p class="footerText">©2008-2025 - Osteoporosis Research Ltd, RF</p></div>
+        <div><p class="footerNumber">+7 (496) 230-45-71</p></div>
+    </footer>
+
+</body>
+</html>
