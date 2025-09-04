@@ -38,10 +38,27 @@ func (h *Handler) GetFactors(ctx *gin.Context) {
 		}
 	}
 
+	orders, err := h.Repository.GetOrders()
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	count := 0
+	for _, order := range orders {
+		for _, factor := range order.Factors {
+			for _, f := range factors {
+				if factor.ID == f.ID {
+					count++
+				}
+			}
+		}
+	}
+
 	ctx.HTML(http.StatusOK, "factors.html", gin.H{
 		"factors": factors,
 		"query":   searchQuery, // передаем введенный запрос обратно на страницу
 		// в ином случае оно будет очищаться при нажатии на кнопку
+		"count": count,
 	})
 }
 
@@ -66,13 +83,13 @@ func (h *Handler) GetFactor(ctx *gin.Context) {
 // orders
 
 func (h *Handler) GetOrders(ctx *gin.Context) {
-	orders, err := h.Repository.GetOrders()
+	order, err := h.Repository.GetOrders()
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	ctx.HTML(http.StatusOK, "factors.html", gin.H{
-		"order": orders,
+		"order": order,
 	})
 }
 

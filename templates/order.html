@@ -37,17 +37,21 @@
 
     <div class="container">
         <!-- Ваши карточки здесь -->
-        <div class="card">
-            <p class="card-title">{{.order.Title}}</p>
-            <p class="card-text">{{.order.Text}}</p>
-        </div>
-        <div class="input-card">
+    {{range .order.Factors}}
+    <div class="card">
+        <p class="card-title">{{.Title}}</p>
+        <p class="card-text">{{.Text}}</p>
+    </div>
+            <div class="input-card">
             <textarea placeholder="Введите текст"></textarea>
         </div>
+    {{end}}
+
     </div>
 
-        <div class="footer-line"></div>
+        
     <footer>
+        <div class="footer-line"></div>
         <div><p class="logo logoFooter">FRAXCALCULATOR.ORG</p></div>
         <div><p class="footerText">©2008-2025 - Osteoporosis Research Ltd, RF</p></div>
         <div><p class="footerNumber">+7 (496) 230-45-71</p></div>

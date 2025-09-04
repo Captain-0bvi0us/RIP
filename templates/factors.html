@@ -3,6 +3,7 @@
 <head>
     <title>Список факторов</title>
     <link rel="stylesheet" href="/resources/styles/main.css">
+    <link rel="stylesheet" href="/resources/styles/order.css">
 </head>
 
 <body>
@@ -15,6 +16,10 @@
         <div>
             <a class="card-button order-button" href="/order/1">Составление заявки</a>
         </div>
+
+    <div class="factor-count">
+    {{.count}}
+    </div>
 
         <div>
             <form action="/FRAX" method="GET">

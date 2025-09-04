@@ -86,25 +86,25 @@ func (r *Repository) GetFactorsByTitle(title string) ([]Factors, error) {
 // orders
 
 type Orders struct { // вот наша новая структура
-	ID_order  int
-	ID_factor int    // поля структур, которые передаются в шаблон
-	Title     string // ОБЯЗАТЕЛЬНО должны быть написаны с заглавной буквы (то есть публичными)
-	Text      string
+	ID_order int
+	Factors  []Factors
 }
 
 func (r *Repository) GetOrders() ([]Orders, error) {
-	// имитируем работу с БД. Типа мы выполнили sql запрос и получили эти строки из БД
-	orders := []Orders{ // массив элементов из наших структур
-		{
-			ID_order:  1,
-			ID_factor: 1,
-			Title:     "first order",
-			Text:      "first order text",
-		},
+	factors, err := r.GetFactors()
+	if err != nil {
+		return nil, err
 	}
 
-	if len(orders) == 0 {
-		return nil, fmt.Errorf("массив пустой")
+	orders := []Orders{
+		{
+			ID_order: 1,
+			Factors: []Factors{
+				factors[0],
+				factors[1],
+				factors[3],
+			},
+		},
 	}
 
 	return orders, nil

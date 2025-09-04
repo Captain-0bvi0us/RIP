@@ -25,7 +25,7 @@ func StartServer() {
 	r.Static("/resources", "../../resources")
 
 	r.GET("/FRAX", handler.GetFactors)
-	r.GET("/factor/:id", handler.GetOrder)
+	r.GET("/factor/:id", handler.GetFactor)
 	r.GET("/order/:id", handler.GetOrder)
 
 	r.Run()
