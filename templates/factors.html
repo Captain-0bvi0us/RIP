@@ -4,6 +4,7 @@
     <title>Список факторов</title>
     <link rel="stylesheet" href="/resources/styles/main.css">
     <link rel="stylesheet" href="/resources/styles/order.css">
+    <link rel="stylesheet" href="/resources/styles/cards.css">
 </head>
 
 <body>
@@ -27,14 +28,17 @@
             </form>
         </div>
 
-        <div class="container">
-            {{range .factors}}
-            <div class="card">
-                <p class="card-title">{{.Title}}</p>
-                <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
-            </div>
-            {{end}}
+<div class="container">
+    {{range .factors}}
+    <div class="card">
+        <img class="card-img" src="{{.Image}}" alt="">
+        <div class="card-content">
+            <p class="card-title">{{.Title}}</p>
+            <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
         </div>
+    </div>
+    {{end}}
+</div>
 
         <div class="footer-line"></div>
     <footer>

@@ -4,6 +4,7 @@
     <title>Составление заявки</title>
     <link rel="stylesheet" href="/resources/styles/main.css">
     <link rel="stylesheet" href="/resources/styles/order.css">
+    <link rel="stylesheet" href="/resources/styles/cards.css">
 </head>
 
 <body>
@@ -40,7 +41,7 @@
     {{range .order.Factors}}
     <div class="card">
         <p class="card-title">{{.Title}}</p>
-        <p class="card-text">{{.Text}}</p>
+        <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
     </div>
             <div class="input-card">
             <textarea placeholder="Введите текст"></textarea>
