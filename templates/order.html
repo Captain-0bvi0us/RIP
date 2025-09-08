@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Составление заявки</title>
     <link rel="stylesheet" href="/resources/styles/main.css">
-    <link rel="stylesheet" href="/resources/styles/order.css">
-    <link rel="stylesheet" href="/resources/styles/cards.css">
 </head>
 
 <body>
@@ -22,41 +21,42 @@
             <p class="form-card-title">Введите данные в анкету</p>
             <form class="form">
                 <label><span>Возраст</span> <input type="text"></label>
-                <label><span>Пол</span> <div class="radio-group"><input type="radio" id="male" name="gender"><label for="male">Мужской</label><input type="radio" id="female" name="gender"><label for="female">Женский</label></div></label>
-                <label><span>Вес</span> <input type="text"> кг</label>
-                <label><span>Рост</span> <input type="text"> см</label>
+                <label>
+                    <span>Пол</span> 
+                    <div class="radio-group">
+                        <input type="radio" id="male" name="gender">
+                        <label for="male"><span class="radio-text">Мужской</span></label>
+                        <input type="radio" id="female" name="gender">
+                        <label for="female"><span class="radio-text">Женский</span></label>
+                    </div>
+                </label>
+                <label><span>Вес</span> <input type="text"><span class="input-unit">кг</span></label>
+                <label><span>Рост</span> <input type="text"><span class="input-unit">см</span></label>
             </form>
         </div>
         <div class="form-card">
             <p class="form-card-title">Результат</p>
             <div class="result-form">
-                <label><span>Остеопоротические переломы</span> <input type="text"></label>
-                <label><span>Перелом шейки бедра</span> <input type="text"></label>
+                <label><span class="result-text">Остеопоротические переломы</span></label>
+                <label><span class="result-text">Перелом шейки бедра</span></label>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <!-- Ваши карточки здесь -->
-    {{range .order.Factors}}
-    <div class="card">
-        <p class="card-title">{{.Title}}</p>
-        <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
-    </div>
-            <div class="input-card">
+        {{range .order.Factors}}
+        <div class="card">
+            <img class="card-img" src="{{.Image}}" alt="">
+            <div class="card-content card-content-for-factors">
+                <p class="card-title">{{.Title}}</p>
+                <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
+            </div>
+        </div>
+        <div class="input-card">
             <textarea placeholder="Введите текст"></textarea>
         </div>
-    {{end}}
-
+        {{end}}
     </div>
-
-        
-    <footer>
-        <div class="footer-line"></div>
-        <div><p class="logo logoFooter">FRAXCALCULATOR.ORG</p></div>
-        <div><p class="footerText">©2008-2025 - Osteoporosis Research Ltd, RF</p></div>
-        <div><p class="footerNumber">+7 (496) 230-45-71</p></div>
-    </footer>
 
 </body>
 </html>

@@ -25,6 +25,8 @@ func (h *Handler) GetFactors(ctx *gin.Context) {
 	var factors []repository.Factors
 	var err error
 
+	// search
+
 	searchQuery := ctx.Query("query")
 	if searchQuery == "" {
 		factors, err = h.Repository.GetFactors()
@@ -38,7 +40,14 @@ func (h *Handler) GetFactors(ctx *gin.Context) {
 		}
 	}
 
+	// count
+
 	orders, err := h.Repository.GetOrders()
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	allFactors, err := h.Repository.GetFactors()
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -46,7 +55,7 @@ func (h *Handler) GetFactors(ctx *gin.Context) {
 	count := 0
 	for _, order := range orders {
 		for _, factor := range order.Factors {
-			for _, f := range factors {
+			for _, f := range allFactors {
 				if factor.ID == f.ID {
 					count++
 				}
@@ -58,6 +67,7 @@ func (h *Handler) GetFactors(ctx *gin.Context) {
 		"factors": factors,
 		"query":   searchQuery,
 		"count":   count,
+		"orderID": orders[0].ID_order,
 	})
 }
 
@@ -80,17 +90,6 @@ func (h *Handler) GetFactor(ctx *gin.Context) {
 }
 
 // orders
-
-func (h *Handler) GetOrders(ctx *gin.Context) {
-	order, err := h.Repository.GetOrders()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "factors.html", gin.H{
-		"order": order,
-	})
-}
 
 func (h *Handler) GetOrder(ctx *gin.Context) {
 	idStr := ctx.Param("id")

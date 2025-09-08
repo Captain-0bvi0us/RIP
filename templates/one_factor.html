@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>{{.factor.Title}}</title>
     <link rel="stylesheet" href="/resources/styles/main.css">
-    <link rel="stylesheet" href="/resources/styles/order.css">
-    <link rel="stylesheet" href="/resources/styles/cards.css">
 </head>
 
 <body>
@@ -13,22 +12,19 @@
         <div class="logo">FRAXCALCULATOR.ORG</div>
         <div><a class="refToMenu" href="/FRAX">Факторы</a></div>
     </header>
-        <div class="header-text">{{.factor.Title}}</div>
-        <div class="header-line"></div>
 
-     <div class="container">
-        <div class="card">
-            <p class="card-title">{{.factor.Title}}</p>
-            <p class="card-text">{{.factor.Text}}</p>
+    <div class="header-text">{{.factor.Title}}</div>
+    <div class="header-line"></div>
+
+    <div class="container">
+        <div class="card card-for-one-factor">
+            <img class="card-img" src="{{.factor.Image}}" alt="">
+            <div class="card-content">
+                <p class="card-title">{{.factor.Title}}</p>
+                <p class="card-text">{{.factor.Text}}</p>
+            </div>
         </div>
     </div>
-
-        <div class="footer-line"></div>
-    <footer>
-        <div><p class="logo logoFooter">FRAXCALCULATOR.ORG</p></div>
-        <div><p class="footerText">©2008-2025 - Osteoporosis Research Ltd, RF</p></div>
-        <div><p class="footerNumber">+7 (496) 230-45-71</p></div>
-    </footer>
 
 </body>
 </html>
