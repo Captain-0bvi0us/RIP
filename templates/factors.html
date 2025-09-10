@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Список факторов</title>
+    <link rel="stylesheet" href="/resources/styles/main.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">FRAXCALCULATOR.ORG</div>
+    </header>
+
+    <div class="header-text">Факторы риска</div>
+    <div class="header-line"></div>
+
+    <div class="search-container">
+        <div class="search-wrapper">
+            <form action="/FRAX" method="GET">
+                <input class="search-input" type="text" name="query" placeholder="Введите запрос" value="{{ .query }}">
+            </form>
+            <div class="cart-container">
+                <a class="cart-button" href="/order/{{ .orderID }}">
+                    <img src="http://localhost:9000/factors/Images/Корзина.png" alt="Корзина">
+                </a>
+                <div class="cart-indicator">
+                    {{.count}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {{range .factors}}
+        <div class="card">
+            <img class="card-img" src="{{.Image}}" alt="">
+            <div class="card-content card-content-for-factors">
+                <p class="card-title">{{.Title}}</p>
+                <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+</body>
+</html>

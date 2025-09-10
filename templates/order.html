@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Составление заявки</title>
+    <link rel="stylesheet" href="/resources/styles/main.css">
+</head>
+
+<body>
+    
+    <header>
+        <div class="logo">FRAXCALCULATOR.ORG</div>
+        <div><a class="refToMenu" href="/FRAX">Факторы</a></div>
+    </header>
+
+    <div class="header-text">Составление заявки</div>
+    <div class="header-line"></div>
+
+    <div class="container-forms">
+        <div class="form-card">
+            <p class="form-card-title">Введите данные в анкету</p>
+            <form class="form">
+                <label><span>Возраст</span> <input type="text"></label>
+                <label>
+                    <span>Пол</span> 
+                    <div class="radio-group">
+                        <input type="radio" id="male" name="gender">
+                        <label for="male"><span class="radio-text">Мужской</span></label>
+                        <input type="radio" id="female" name="gender">
+                        <label for="female"><span class="radio-text">Женский</span></label>
+                    </div>
+                </label>
+                <label><span>Вес</span> <input type="text"><span class="input-unit">кг</span></label>
+                <label><span>Рост</span> <input type="text"><span class="input-unit">см</span></label>
+            </form>
+        </div>
+        <div class="form-card">
+            <p class="form-card-title">Результат</p>
+            <div class="result-form">
+                <label><span class="result-text">Остеопоротические переломы</span></label>
+                <label><span class="result-text">Перелом шейки бедра</span></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {{range .order.Factors}}
+        <div class="card">
+            <img class="card-img" src="{{.Image}}" alt="">
+            <div class="card-content card-content-for-factors">
+                <p class="card-title">{{.Title}}</p>
+                <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
+            </div>
+        </div>
+        <div class="input-card">
+            <textarea placeholder="Введите текст"></textarea>
+        </div>
+        {{end}}
+    </div>
+
+</body>
+</html>
