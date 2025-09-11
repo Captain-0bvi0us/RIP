@@ -275,7 +275,14 @@ header {
 }
 
 .result-text{
-    margin-bottom: 30px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.result{
+    font-weight: 400;
+    font-size: 20px;
 }
 
 /* input order m-m */
@@ -300,5 +307,5 @@ header {
     border-radius: 10px;
     box-sizing: border-box;
     resize: none;
+    
 }
-

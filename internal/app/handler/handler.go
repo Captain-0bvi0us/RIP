@@ -22,58 +22,39 @@ func NewHandler(r *repository.Repository) *Handler {
 // factors
 
 func (h *Handler) GetFactors(ctx *gin.Context) {
-	var factors []repository.Factors
+	var factors []repository.Factor
 	var err error
+	FraxPageID := 1
 
-	// search
+	fraxPage, err := h.Repository.GetFraxPage(FraxPageID)
+	if err != nil {
+		logrus.Error(err)
+	}
+	FactorsCount := len(fraxPage.Factors)
 
-	searchQuery := ctx.Query("query")
-	if searchQuery == "" {
+	searchFactor := ctx.Query("query")
+	if searchFactor == "" {
 		factors, err = h.Repository.GetFactors()
 		if err != nil {
 			logrus.Error(err)
 		}
 	} else {
-		factors, err = h.Repository.GetFactorsByTitle(searchQuery)
+		factors, err = h.Repository.GetFactorsByTitle(searchFactor)
 		if err != nil {
 			logrus.Error(err)
 		}
 	}
 
-	// count
-
-	orders, err := h.Repository.GetOrders()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	allFactors, err := h.Repository.GetFactors()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	count := 0
-	for _, order := range orders {
-		for _, factor := range order.Factors {
-			for _, f := range allFactors {
-				if factor.ID == f.ID {
-					count++
-				}
-			}
-		}
-	}
-
 	ctx.HTML(http.StatusOK, "factors.html", gin.H{
-		"factors": factors,
-		"query":   searchQuery,
-		"count":   count,
-		"orderID": orders[0].ID_order,
+		"factors":      factors,
+		"searchFactor": searchFactor,
+		"factorsCount": FactorsCount,
+		"fraxPageID":   FraxPageID,
 	})
 }
 
 func (h *Handler) GetFactor(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		logrus.Error(err)
@@ -84,14 +65,14 @@ func (h *Handler) GetFactor(ctx *gin.Context) {
 		logrus.Error(err)
 	}
 
-	ctx.HTML(http.StatusOK, "one_factor.html", gin.H{
+	ctx.HTML(http.StatusOK, "oneFactor.html", gin.H{
 		"factor": factor,
 	})
 }
 
-// orders
+// frax
 
-func (h *Handler) GetOrder(ctx *gin.Context) {
+func (h *Handler) GetFraxPage(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 
 	id, err := strconv.Atoi(idStr)
@@ -99,12 +80,19 @@ func (h *Handler) GetOrder(ctx *gin.Context) {
 		logrus.Error(err)
 	}
 
-	order, err := h.Repository.GetOrder(id)
+	fraxPage, err := h.Repository.GetFraxPage(id)
+	factorsInFraxPage := fraxPage.Factors
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	ctx.HTML(http.StatusOK, "order.html", gin.H{
-		"order": order,
+	ctx.HTML(http.StatusOK, "fraxPage.html", gin.H{
+		"factorsInFraxPage": factorsInFraxPage,
+		"Age":               fraxPage.Age,
+		"Gender":            fraxPage.Gender,
+		"Weight":            fraxPage.Weight,
+		"Height":            fraxPage.Height,
+		"FirstResult":       fraxPage.FirstResult,
+		"SecondResult":      fraxPage.SecondResult,
 	})
 }

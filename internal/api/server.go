@@ -26,7 +26,7 @@ func StartServer() {
 
 	r.GET("/FRAX", handler.GetFactors)
 	r.GET("/factor/:id", handler.GetFactor)
-	r.GET("/order/:id", handler.GetOrder)
+	r.GET("/fraxPage/:id", handler.GetFraxPage)
 
 	r.Run()
 
