@@ -1,6 +1,6 @@
 services:
   # имеджи, которые запустятся по вашему желанию
-  db:
+  postgres:
     # название моего имеджа
     image: postgres:12 # скачает image postgres 12 версии
     volumes:
@@ -10,12 +10,20 @@ services:
         target: /var/lib/postgresql/data
     ports:
       # порты
-      - "5432:5432"
+      - "5433:5432"
     environment:
       # переменные окружения, меняйте их если хотите поменять пароль, логин или название стартовой базы данных
       POSTGRES_USER: root
       POSTGRES_DB: RIP
       POSTGRES_PASSWORD: root
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+
   minio:
     container_name: minio
     image: minio/minio:latest
@@ -29,6 +37,7 @@ services:
     volumes:
       - minio-data:/data
     command: server /data
+
   redis:
     image: redis:6.2-alpine
     restart: always

@@ -21,8 +21,8 @@ func StartServer() {
 
 	r := gin.Default()
 
-	r.LoadHTMLGlob("../../templates/*")
-	r.Static("/resources", "../../resources")
+	r.LoadHTMLGlob("templates/*")
+	r.Static("/resources", "./resources")
 
 	r.GET("/FRAX", handler.GetFactors)
 	r.GET("/factor/:id", handler.GetFactor)
