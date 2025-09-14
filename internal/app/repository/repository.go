@@ -101,13 +101,13 @@ func (r *Repository) GetFactorsByTitle(title string) ([]Factor, error) {
 // frax
 
 type FraxPage struct {
-	Age          int
-	Gender       int
-	Weight       int
-	Height       int
-	Factors      []FactorsToFrax
-	FirstResult  string
-	SecondResult string
+	Age     int
+	Gender  int
+	Weight  int
+	Height  int
+	Factors []FactorsToFrax
+	POF     string
+	PHF     string
 }
 
 type FactorsToFrax struct {
@@ -126,8 +126,8 @@ var fraxPages = map[int]FraxPage{
 			{Factor: factors[1], Description: "Привычка наблюдается на протяжении 6 лет."},
 			{Factor: factors[2], Description: "Был перелом бедренной кости 7 лет назад."},
 		},
-		FirstResult:  "33%",
-		SecondResult: "24%",
+		POF: "33%",
+		PHF: "24%",
 	},
 }
 

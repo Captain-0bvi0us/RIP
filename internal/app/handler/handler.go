@@ -92,7 +92,7 @@ func (h *Handler) GetFraxPage(ctx *gin.Context) {
 		"Gender":            fraxPage.Gender,
 		"Weight":            fraxPage.Weight,
 		"Height":            fraxPage.Height,
-		"FirstResult":       fraxPage.FirstResult,
-		"SecondResult":      fraxPage.SecondResult,
+		"FirstResult":       fraxPage.POF,
+		"SecondResult":      fraxPage.PHF,
 	})
 }
