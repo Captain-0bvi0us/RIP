@@ -2,8 +2,6 @@ package handler
 
 import (
 	"RIP/internal/app/repository"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -19,80 +17,23 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-// factors
-
-func (h *Handler) GetFactors(ctx *gin.Context) {
-	var factors []repository.Factor
-	var err error
-	FraxPageID := 1
-
-	fraxPage, err := h.Repository.GetFraxPage(FraxPageID)
-	if err != nil {
-		logrus.Error(err)
-	}
-	FactorsCount := len(fraxPage.Factors)
-
-	searchFactor := ctx.Query("query")
-	if searchFactor == "" {
-		factors, err = h.Repository.GetFactors()
-		if err != nil {
-			logrus.Error(err)
-		}
-	} else {
-		factors, err = h.Repository.GetFactorsByTitle(searchFactor)
-		if err != nil {
-			logrus.Error(err)
-		}
-	}
-
-	ctx.HTML(http.StatusOK, "factors.html", gin.H{
-		"factors":      factors,
-		"searchFactor": searchFactor,
-		"factorsCount": FactorsCount,
-		"fraxPageID":   FraxPageID,
-	})
+// RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
+func (h *Handler) RegisterHandler(router *gin.Engine) {
+	router.GET("/FRAX", h.GetAllFactors)
+	router.GET("/factor/:id", h.GetFactorById)
 }
 
-func (h *Handler) GetFactor(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	factor, err := h.Repository.GetFactor(id)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "oneFactor.html", gin.H{
-		"factor": factor,
-	})
+// RegisterStatic То же самое, что и с маршрутами, регистрируем статику
+func (h *Handler) RegisterStatic(router *gin.Engine) {
+	router.LoadHTMLGlob("templates/*")
+	router.Static("/resources", "./resources")
 }
 
-// frax
-
-func (h *Handler) GetFraxPage(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	fraxPage, err := h.Repository.GetFraxPage(id)
-	factorsInFraxPage := fraxPage.Factors
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	ctx.HTML(http.StatusOK, "fraxPage.html", gin.H{
-		"factorsInFraxPage": factorsInFraxPage,
-		"Age":               fraxPage.Age,
-		"Gender":            fraxPage.Gender,
-		"Weight":            fraxPage.Weight,
-		"Height":            fraxPage.Height,
-		"FirstResult":       fraxPage.FirstResult,
-		"SecondResult":      fraxPage.SecondResult,
+// errorHandler для более удобного вывода ошибок
+func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
+	logrus.Error(err.Error())
+	ctx.JSON(errorStatusCode, gin.H{
+		"status":      "error",
+		"description": err.Error(),
 	})
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>{{.factor.FactorTitle}}</title>
+    <title>{{.Title}}</title>
     <link rel="stylesheet" href="/resources/styles/main.css">
 </head>
 
@@ -13,15 +13,15 @@
         <div><a class="refToMenu" href="/FRAX">Факторы</a></div>
     </header>
 
-    <div class="header-text">{{.factor.FactorTitle}}</div>
+    <div class="header-text">{{.Title}}</div>
     <div class="header-line"></div>
 
     <div class="container">
         <div class="card card-for-one-factor">
-            <img class="card-img" src="{{.factor.FactorImage}}" alt="">
+            <img class="card-img" src="{{.Image}}" alt="">
             <div class="card-content">
-                <p class="card-title">{{.factor.FactorTitle}}</p>
-                <p class="card-text">{{.factor.FactorText}}</p>
+                <p class="card-title">{{.Title}}</p>
+                <p class="card-text">{{.Text}}</p>
             </div>
         </div>
     </div>

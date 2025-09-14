@@ -18,7 +18,7 @@
     <div class="search-container">
         <div class="search-wrapper">
             <form action="/FRAX" method="GET">
-                <input class="search-input" type="text" name="query" placeholder="Введите запрос" value="{{ .searchFactor }}">
+                <input class="search-input" type="text" name="search" placeholder="Введите запрос" value="{{ .factorsSearch }}">
             </form>
             <div class="cart-container">
                 <a class="cart-button" href="/fraxPage/{{ .fraxPageID }}">
@@ -34,10 +34,10 @@
     <div class="container">
         {{range .factors}}
         <div class="card">
-            <img class="card-img" src="{{.FactorImage}}" alt="">
+            <img class="card-img" src="{{.Image}}" alt="">
             <div class="card-content card-content-for-factors">
-                <p class="card-title">{{.FactorTitle}}</p>
-                <a class="card-button" href="/factor/{{ .FactorID }}">Подробнее</a>
+                <p class="card-title">{{.Title}}</p>
+                <a class="card-button" href="/factor/{{ .ID }}">Подробнее</a>
             </div>
         </div>
         {{end}}
