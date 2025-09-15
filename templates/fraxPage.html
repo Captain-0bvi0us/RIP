@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <title>Составление заявки</title>
     <link rel="stylesheet" href="/resources/styles/main.css">
 </head>
-
 <body>
-    
     <header>
         <div class="logo">FRAXCALCULATOR.ORG</div>
         <div><a class="refToMenu" href="/FRAX">Факторы</a></div>
@@ -20,38 +17,38 @@
         <div class="form-card">
             <p class="form-card-title">Введите данные в анкету</p>
             <form class="form">
-                <label><span>Возраст</span> <input type="text" value="{{.Age}}"></label>
+                <label><span>Возраст</span> <input type="text"></label>
                 <label>
-                    <span>Пол</span> 
+                    <span>Пол</span>
                     <div class="radio-group">
-                        <input type="radio" id="male" name="gender" {{ if eq .Gender 0 }}checked{{ end }}>
+                        <input type="radio" id="male" name="gender">
                         <label for="male"><span class="radio-text">Мужской</span></label>
-                        <input type="radio" id="female" name="gender" {{ if eq .Gender 1 }}checked{{ end }}>
+                        <input type="radio" id="female" name="gender">
                         <label for="female"><span class="radio-text">Женский</span></label>
                     </div>
                 </label>
-                <label><span>Вес</span> <input type="text" value="{{.Weight}}"><span class="input-unit">кг</span></label>
-                <label><span>Рост</span> <input type="text" value="{{.Height}}"><span class="input-unit">см</span></label>
+                <label><span>Вес</span> <input type="text"><span class="input-unit">кг</span></label>
+                <label><span>Рост</span> <input type="text"><span class="input-unit">см</span></label>
             </form>
         </div>
         <div class="form-card">
             <p class="form-card-title">Результат</p>
             <div class="result-form">
                 <label><span class="result-text">Остеопоротические переломы</span></label>
-                <label><span class="result">{{.FirstResult}}</span></label>
+                <label><span class="result"></span>0.0%</label>
                 <label><span class="result-text">Перелом шейки бедра</span></label>
-                <label><span class="result">{{.SecondResult}}</span></label>
+                <label><span class="result"></span>0.0%</label>
             </div>
         </div>
     </div>
 
     <div class="container">
-        {{range .factorsInFraxPage}}
+        {{range .FactorsLink}}
         <div class="card">
-            <img class="card-img" src="{{.Factor.FactorImage}}" alt="">
+            <img class="card-img" src="{{.Factor.Image}}" alt="">
             <div class="card-content card-content-for-factors">
-                <p class="card-title">{{.Factor.FactorTitle}}</p>
-                <a class="card-button" href="/factor/{{ .Factor.FactorID }}">Подробнее</a>
+                <p class="card-title">{{.Factor.Title}}</p>
+				<a class="card-button" href="/factor/{{ .Factor.ID }}">Подробнее</a>
             </div>
         </div>
         <div class="input-card">
@@ -59,6 +56,11 @@
         </div>
         {{end}}
     </div>
-
+    
+	<div class="frax-delete-button">
+		<form action="/frax/{{ .ID }}/delete" method="POST">
+			<button class="card-button" type="submit">Удалить заявку</button>
+		</form>
+	</div>
 </body>
 </html>

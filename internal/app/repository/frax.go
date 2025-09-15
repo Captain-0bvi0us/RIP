@@ -2,106 +2,71 @@ package repository
 
 import (
 	"RIP/internal/app/ds"
-	"fmt"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
-func (r *Repository) GetAllFactors() ([]ds.Factors, error) {
-	var factors []ds.Factors
+// GetOrCreateDraftFrax находит заявку-черновик для пользователя или создает новую.
+// Временно используем userID = 1, как "захардкоженный" ID пользователя-модератора.
+func (r *Repository) GetOrCreateDraftFrax(userID uint) (*ds.FraxSearching, error) {
+	var frax ds.FraxSearching
 
-	err := r.db.Find(&factors).Error
+	// Ищем черновик у пользователя
+	err := r.db.Where("creator_id = ? AND status = ?", userID, ds.StatusDraft).First(&frax).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Если не нашли, создаем новый черновик
+		newFrax := ds.FraxSearching{
+			CreatorID: userID,
+			Status:    ds.StatusDraft,
+		}
+		if err := r.db.Create(&newFrax).Error; err != nil {
+			return nil, err
+		}
+		return &newFrax, nil
+	}
+
+	return &frax, err
+}
+
+// AddFactorToFrax добавляет фактор в заявку (создает запись в таблице m-m).
+func (r *Repository) AddFactorToFrax(fraxID, factorID uint) error {
+	// Проверяем, нет ли уже такого фактора в заявке, чтобы избежать дублей
+	var count int64
+	r.db.Model(&ds.FactorToFrax{}).Where("frax_id = ? AND factor_id = ?", fraxID, factorID).Count(&count)
+	if count > 0 {
+		return errors.New("factor already in frax")
+	}
+
+	link := ds.FactorToFrax{
+		FraxID:   fraxID,
+		FactorID: factorID,
+	}
+	return r.db.Create(&link).Error
+}
+
+// GetFraxWithFactors получает заявку со всеми связанными факторами.
+// Используем Preload для эффективной загрузки связанных данных.
+func (r *Repository) GetFraxWithFactors(fraxID uint) (*ds.FraxSearching, error) {
+	var frax ds.FraxSearching
+
+	err := r.db.Preload("FactorsLink.Factor").First(&frax, fraxID).Error
 	if err != nil {
 		return nil, err
 	}
 
-	if len(factors) == 0 {
-		return nil, fmt.Errorf("factors not found")
+	// Проверяем, что заявка не удалена
+	if frax.Status == ds.StatusDeleted {
+		return nil, errors.New("frax page not found or has been deleted")
 	}
-	return factors, nil
+
+	return &frax, nil
 }
 
-func (r *Repository) SearchFactorsByName(title string) ([]ds.Factors, error) {
-	var factors []ds.Factors
-	err := r.db.Where("title ILIKE ?", "%"+title+"%").Find(&factors).Error // добавили условие
-	if err != nil {
-		return nil, err
-	}
-	return factors, nil
+// LogicallyDeleteFrax выполняет логическое удаление заявки через чистый SQL UPDATE.
+func (r *Repository) LogicallyDeleteFrax(fraxID uint) error {
+	// Используем Exec для выполнения "сырого" SQL-запроса
+	result := r.db.Exec("UPDATE frax_searchings SET status = ? WHERE id = ?", ds.StatusDeleted, fraxID)
+	return result.Error
 }
-
-func (r *Repository) GetFactorByID(id int) (*ds.Factors, error) {
-	var factor ds.Factors
-	err := r.db.First(&factor, id).Error
-	if err != nil {
-		// GORM сам возвращает специальную ошибку gorm.ErrRecordNotFound
-		return nil, err
-	}
-	return &factor, nil
-}
-
-// func (r *Repository) GetFactor(id int) ([]ds.Factors, error) {
-// 	factors, err := r.GetAllFactors()
-// 	if err != nil {
-// 		return Factor{}, err
-// 	}
-
-// 	for _, factor := range factors {
-// 		if factor.FactorID == id {
-// 			return factor, nil
-// 		}
-// 	}
-
-// 	return Factor{}, fmt.Errorf("фактор не найден")
-// }
-
-// func (r *Repository) GetFactorsByTitle(title string) ([]Factor, error) {
-// 	factors, err := r.GetFactors()
-// 	if err != nil {
-// 		return []Factor{}, err
-// 	}
-
-// 	var result []Factor
-// 	for _, factor := range factors {
-// 		if strings.Contains(strings.ToLower(factor.FactorTitle), strings.ToLower(title)) {
-// 			result = append(result, factor)
-// 		}
-// 	}
-
-// 	return result, nil
-// }
-
-// // frax
-
-// type FraxPage struct {
-// 	Age          int
-// 	Gender       int
-// 	Weight       int
-// 	Height       int
-// 	Factors      []FactorsToFrax
-// 	FirstResult  string
-// 	SecondResult string
-// }
-
-// type FactorsToFrax struct {
-// 	Factor      Factor
-// 	Description string
-// }
-
-// var fraxPages = map[int]FraxPage{
-// 	1: {
-// 		Age:    56,
-// 		Gender: 1,
-// 		Weight: 97,
-// 		Height: 174,
-// 		Factors: []FactorsToFrax{
-// 			{Factor: factors[0], Description: "Зависимость продолжается на протяжении 5 месяцев."},
-// 			{Factor: factors[1], Description: "Привычка наблюдается на протяжении 6 лет."},
-// 			{Factor: factors[2], Description: "Был перелом бедренной кости 7 лет назад."},
-// 		},
-// 		FirstResult:  "33%",
-// 		SecondResult: "24%",
-// 	},
-// }
-
-// func (r *Repository) GetFraxPage(id int) (FraxPage, error) {
-// 	return fraxPages[id], nil
-// }

@@ -64,7 +64,7 @@ header {
     background-color: #f7f7f7;
     border: 1px solid #ccc;
     border-radius: 10px;
-    width: 350px;
+    width: 400px;
     height: 150px;
     display: flex;
     justify-content: space-between;
@@ -308,4 +308,13 @@ header {
     box-sizing: border-box;
     resize: none;
     
+}
+
+/* farx delete button */
+
+.frax-delete-button{
+    display: flex;
+    justify-content: center; 
+    max-width: 1160px;
+    margin: 20px auto;
 }

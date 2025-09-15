@@ -20,7 +20,11 @@ func NewHandler(r *repository.Repository) *Handler {
 // RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
 func (h *Handler) RegisterHandler(router *gin.Engine) {
 	router.GET("/FRAX", h.GetAllFactors)
-	router.GET("/factor/:id", h.GetFactorById)
+	router.GET("/factor/:id", h.GetFactorByID)
+	router.GET("/frax/:frax_id", h.GetFraxPage)
+	router.POST("/frax/add/factor/:factor_id", h.AddFactorToFrax)
+	router.POST("/frax/:frax_id/delete", h.DeleteFrax)
+
 }
 
 // RegisterStatic То же самое, что и с маршрутами, регистрируем статику
