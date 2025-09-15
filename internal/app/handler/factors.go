@@ -28,12 +28,11 @@ func (h *Handler) GetAllFactors(ctx *gin.Context) {
 		return
 	}
 
-	draftFrax, _ := h.Repository.GetOrCreateDraftFrax(hardcodedUserID)
+	draftFrax, err := h.Repository.GetDraftFrax(hardcodedUserID)
 	var fraxID uint = 0
 	var factorsCount int = 0
 
-	if draftFrax != nil {
-		// Загружаем связанные факторы, чтобы посчитать их количество
+	if err == nil && draftFrax != nil {
 		fullFrax, err := h.Repository.GetFraxWithFactors(draftFrax.ID)
 		if err == nil {
 			fraxID = fullFrax.ID

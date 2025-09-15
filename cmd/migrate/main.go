@@ -15,8 +15,6 @@ func main() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-
-	// Migrate the schema
 	err = db.AutoMigrate(
 		&ds.Factors{},
 		&ds.FraxSearching{},

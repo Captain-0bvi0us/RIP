@@ -1,8 +1,7 @@
 package ds
 
 // Factors соответствует таблице "Factors"
-// Это справочник всех возможных факторов риска (например, "Курение", "Алкоголь" и т.д.).
-// Factors соответствует таблице "Factors".
+// Это справочник всех возможных факторов риска.
 type Factors struct {
 	ID       uint     `gorm:"primaryKey;column:id"`
 	Title    string   `gorm:"column:title;size:255;not null"`

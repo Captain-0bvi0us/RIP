@@ -1,5 +1,6 @@
 package ds
 
+// FactorToFrax соответствует таблице "FactorToFrax"
 type FactorToFrax struct {
 	ID          uint    `gorm:"primaryKey;column:id"`
 	FraxID      uint    `gorm:"column:frax_id;not null"`   // Внешний ключ к FraxSearching

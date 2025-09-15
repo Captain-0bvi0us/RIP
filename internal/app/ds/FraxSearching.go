@@ -21,7 +21,6 @@ type FraxSearching struct {
 	// --- СВЯЗИ ---
 	// Отношение "принадлежит к": каждая сессия принадлежит одному пользователю.
 	Creator Users `gorm:"foreignKey:CreatorID"`
-
 	// Отношение "один-ко-многим" к связующей таблице:
 	// У одной сессии может быть много записей-факторов.
 	FactorsLink []FactorToFrax `gorm:"foreignKey:FraxID"`
