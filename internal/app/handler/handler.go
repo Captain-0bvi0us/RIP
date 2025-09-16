@@ -32,7 +32,7 @@ func (h *Handler) GetFactors(ctx *gin.Context) {
 	}
 	FactorsCount := len(fraxPage.Factors)
 
-	searchFactor := ctx.Query("query")
+	searchFactor := ctx.Query("searchingFactors")
 	if searchFactor == "" {
 		factors, err = h.Repository.GetFactors()
 		if err != nil {
@@ -86,7 +86,7 @@ func (h *Handler) GetFraxPage(ctx *gin.Context) {
 		logrus.Error(err)
 	}
 
-	ctx.HTML(http.StatusOK, "fraxPage.html", gin.H{
+	ctx.HTML(http.StatusOK, "frax.html", gin.H{
 		"factorsInFraxPage": factorsInFraxPage,
 		"Age":               fraxPage.Age,
 		"Gender":            fraxPage.Gender,
