@@ -131,6 +131,6 @@ var fraxPages = map[int]FraxPage{
 	},
 }
 
-func (r *Repository) GetFraxPage(id int) (FraxPage, error) {
+func (r *Repository) GetFrax(id int) (FraxPage, error) {
 	return fraxPages[id], nil
 }

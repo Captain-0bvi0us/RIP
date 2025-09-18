@@ -24,13 +24,13 @@ func NewHandler(r *repository.Repository) *Handler {
 func (h *Handler) GetFactors(ctx *gin.Context) {
 	var factors []repository.Factor
 	var err error
-	FraxPageID := 1
+	FraxID := 1
 
-	fraxPage, err := h.Repository.GetFraxPage(FraxPageID)
+	frax, err := h.Repository.GetFrax(FraxID)
 	if err != nil {
 		logrus.Error(err)
 	}
-	FactorsCount := len(fraxPage.Factors)
+	FactorsCount := len(frax.Factors)
 
 	searchFactor := ctx.Query("searchingFactors")
 	if searchFactor == "" {
@@ -49,7 +49,7 @@ func (h *Handler) GetFactors(ctx *gin.Context) {
 		"factors":      factors,
 		"searchFactor": searchFactor,
 		"factorsCount": FactorsCount,
-		"fraxPageID":   FraxPageID,
+		"fraxID":       FraxID,
 	})
 }
 
@@ -72,7 +72,7 @@ func (h *Handler) GetFactor(ctx *gin.Context) {
 
 // frax
 
-func (h *Handler) GetFraxPage(ctx *gin.Context) {
+func (h *Handler) GetFrax(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 
 	id, err := strconv.Atoi(idStr)
@@ -80,19 +80,19 @@ func (h *Handler) GetFraxPage(ctx *gin.Context) {
 		logrus.Error(err)
 	}
 
-	fraxPage, err := h.Repository.GetFraxPage(id)
-	factorsInFraxPage := fraxPage.Factors
+	frax, err := h.Repository.GetFrax(id)
+	factorsInFrax := frax.Factors
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	ctx.HTML(http.StatusOK, "frax.html", gin.H{
-		"factorsInFraxPage": factorsInFraxPage,
-		"Age":               fraxPage.Age,
-		"Gender":            fraxPage.Gender,
-		"Weight":            fraxPage.Weight,
-		"Height":            fraxPage.Height,
-		"POF":               fraxPage.POF,
-		"PHF":               fraxPage.PHF,
+		"factorsInFrax": factorsInFrax,
+		"Age":           frax.Age,
+		"Gender":        frax.Gender,
+		"Weight":        frax.Weight,
+		"Height":        frax.Height,
+		"POF":           frax.POF,
+		"PHF":           frax.PHF,
 	})
 }
