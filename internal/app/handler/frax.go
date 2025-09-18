@@ -41,7 +41,7 @@ func (h *Handler) AddFactorToFrax(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/FRAX")
 }
 
-func (h *Handler) GetFraxPage(c *gin.Context) {
+func (h *Handler) GetFrax(c *gin.Context) {
 	fraxID, err := strconv.Atoi(c.Param("frax_id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -59,7 +59,7 @@ func (h *Handler) GetFraxPage(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "fraxPage.html", frax)
+	c.HTML(http.StatusOK, "frax.html", frax)
 }
 
 func (h *Handler) DeleteFrax(c *gin.Context) {

@@ -20,7 +20,7 @@ func NewHandler(r *repository.Repository) *Handler {
 func (h *Handler) RegisterHandler(router *gin.Engine) {
 	router.GET("/FRAX", h.GetAllFactors)
 	router.GET("/factor/:id", h.GetFactorByID)
-	router.GET("/frax/:frax_id", h.GetFraxPage)
+	router.GET("/frax/:frax_id", h.GetFrax)
 	router.POST("/frax/add/factor/:factor_id", h.AddFactorToFrax)
 	router.POST("/frax/:frax_id/delete", h.DeleteFrax)
 

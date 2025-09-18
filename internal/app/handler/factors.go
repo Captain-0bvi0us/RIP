@@ -13,11 +13,11 @@ func (h *Handler) GetAllFactors(ctx *gin.Context) {
 	var factors []ds.Factors
 	var err error
 
-	search := ctx.Query("search")
-	if search == "" {
+	searchingFactors := ctx.Query("searchingFactors")
+	if searchingFactors == "" {
 		factors, err = h.Repository.GetAllFactors()
 	} else {
-		factors, err = h.Repository.SearchFactorsByName(search)
+		factors, err = h.Repository.SearchFactorsByName(searchingFactors)
 	}
 
 	if err != nil {
@@ -42,7 +42,7 @@ func (h *Handler) GetAllFactors(ctx *gin.Context) {
 
 	ctx.HTML(http.StatusOK, "factors.html", gin.H{
 		"factors":       factors,
-		"factorsSearch": search,
+		"factorsSearch": searchingFactors,
 		"fraxID":        fraxID,
 		"factorsCount":  factorsCount,
 	})
