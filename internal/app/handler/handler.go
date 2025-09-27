@@ -7,6 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const hardcodedUserID = 1
+
 type Handler struct {
 	Repository *repository.Repository
 }
@@ -17,18 +19,36 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) RegisterHandler(router *gin.Engine) {
-	router.GET("/FRAX", h.GetAllFactors)
-	router.GET("/factor/:id", h.GetFactorByID)
-	router.GET("/frax/:frax_id", h.GetFrax)
-	router.POST("/frax/add/factor/:factor_id", h.AddFactorToFrax)
-	router.POST("/frax/:frax_id/delete", h.DeleteFrax)
+// Регистрация только API роутов
+func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
+	// Домен услуг (факторов)
+	r.GET("/factors", h.GetFactors)
+	r.GET("/factors/:id", h.GetFactor)
+	r.POST("/factors", h.CreateFactor)
+	r.PUT("/factors/:id", h.UpdateFactor)
+	r.DELETE("/factors/:id", h.DeleteFactor)
+	r.POST("/frax/draft/factors/:factor_id", h.APIAddFactorToDraft)
+	r.POST("/factors/:id/image", h.UploadFactorImage)
 
-}
+	// Домен заявок (FRAX)
+	r.GET("/frax/cart", h.APIGetCartBadge)
+	r.GET("/frax", h.APIListFrax)
+	r.GET("/frax/:id", h.APIGetFrax)
+	r.PUT("/frax/:id", h.APIUpdateFrax)
+	r.PUT("/frax/:id/form", h.APIFormFrax)
+	r.PUT("/frax/:id/resolve", h.APIResolveFrax)
+	r.DELETE("/frax/:id", h.APIDeleteFrax)
 
-func (h *Handler) RegisterStatic(router *gin.Engine) {
-	router.LoadHTMLGlob("templates/*")
-	router.Static("/resources", "./resources")
+	// Домен м-м
+	r.DELETE("/frax/:id/factors/:factor_id", h.APIRemoveFactorFromFrax)
+	r.PUT("/frax/:id/factors/:factor_id", h.APIUpdateMM)
+
+	// Домен пользователь
+	r.POST("/users", h.APIRegister)
+	r.POST("/auth/login", h.APILogin)
+	r.POST("/auth/logout", h.APILogout)
+	r.GET("/users/me", h.APIGetMe)
+	r.PUT("/users/me", h.APIUpdateMe)
 }
 
 func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
