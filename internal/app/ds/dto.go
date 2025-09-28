@@ -2,7 +2,6 @@ package ds
 
 import "time"
 
-// DTO для API ответов
 type FactorDTO struct {
 	ID       uint     `json:"id"`
 	Title    string   `json:"title"`
@@ -28,8 +27,8 @@ type FraxDTO struct {
 	ID             uint              `json:"id"`
 	Status         int               `json:"status"`
 	CreationDate   time.Time         `json:"creation_date"`
-	CreatorLogin   string            `json:"creator_login"`
-	ModeratorLogin *string           `json:"moderator_login"`
+	CreatorID      uint              `json:"creator_login"`
+	ModeratorID    *uint             `json:"moderator_login"`
 	FormingDate    *time.Time        `json:"forming_date"`
 	ComplitionDate *time.Time        `json:"complition_date"`
 	Age            *int              `json:"age"`
@@ -38,7 +37,7 @@ type FraxDTO struct {
 	Height         *int              `json:"height"`
 	POF            *float64          `json:"POF"`
 	PHF            *float64          `json:"PHF"`
-	Factors        []FactorInFraxDTO `json:"factors"`
+	Factors        []FactorInFraxDTO `json:"factors,omitempty"`
 }
 
 type FactorInFraxDTO struct {
@@ -88,9 +87,8 @@ type UserDTO struct {
 }
 
 type UserUpdateRequest struct {
-	Username  *string `json:"username"`
-	Password  *string `json:"password"`
-	Moderator *bool   `json:"moderator"`
+	Username *string `json:"username"`
+	Password *string `json:"password"`
 }
 
 type LoginResponse struct {
@@ -98,7 +96,6 @@ type LoginResponse struct {
 	User  UserDTO `json:"user"`
 }
 
-// Отображение списка факторов с их атрибутами и количеством
 type PaginatedResponse struct {
 	Items interface{} `json:"items"`
 	Total int64       `json:"total"`

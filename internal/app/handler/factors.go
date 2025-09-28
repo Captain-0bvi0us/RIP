@@ -145,7 +145,7 @@ func (h *Handler) DeleteFactor(c *gin.Context) {
 }
 
 // POST /api/frax/draft/factors/:factor_id - добавление фактора в черновик
-func (h *Handler) APIAddFactorToDraft(c *gin.Context) {
+func (h *Handler) AddFactorToDraft(c *gin.Context) {
 	factorID, err := strconv.Atoi(c.Param("factor_id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)

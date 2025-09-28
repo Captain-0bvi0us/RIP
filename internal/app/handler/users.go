@@ -3,20 +3,20 @@ package handler
 import (
 	"RIP/internal/app/ds"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // POST /api/users - регистрация пользователя
-func (h *Handler) APIRegister(c *gin.Context) {
+func (h *Handler) Register(c *gin.Context) {
 	var req ds.UserRegisterRequest
 	if err := c.BindJSON(&req); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// Хешируем пароль
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
@@ -43,8 +43,53 @@ func (h *Handler) APIRegister(c *gin.Context) {
 	c.JSON(http.StatusCreated, userDTO)
 }
 
+// GET /api/users/:id - получение данных пользователя
+func (h *Handler) GetUserData(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	user, err := h.Repository.GetUserByID(uint(id))
+	if err != nil {
+		h.errorHandler(c, http.StatusNotFound, err)
+		return
+	}
+
+	userDTO := ds.UserDTO{
+		ID:        user.ID,
+		Username:  user.Username,
+		Moderator: user.Moderator,
+	}
+	c.JSON(http.StatusOK, userDTO)
+}
+
+// PUT /api/users/:id - обновление данных пользователя
+func (h *Handler) UpdateUserData(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var req ds.UserUpdateRequest
+	if err := c.BindJSON(&req); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.Repository.UpdateUser(uint(id), req); err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
 // POST /api/auth/login - аутентификация
-func (h *Handler) APILogin(c *gin.Context) {
+func (h *Handler) Login(c *gin.Context) {
 	var req ds.UserLoginRequest
 	if err := c.BindJSON(&req); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -57,15 +102,13 @@ func (h *Handler) APILogin(c *gin.Context) {
 		return
 	}
 
-	// Проверяем пароль
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		h.errorHandler(c, http.StatusUnauthorized, err)
 		return
 	}
 
-	// Для лабораторной работы возвращаем заглушку токена
 	response := ds.LoginResponse{
-		Token: "stub_token_for_lab",
+		Token: "the_really_good_token",
 		User: ds.UserDTO{
 			ID:        user.ID,
 			Username:  user.Username,
@@ -77,42 +120,8 @@ func (h *Handler) APILogin(c *gin.Context) {
 }
 
 // POST /api/auth/logout - деавторизация
-func (h *Handler) APILogout(c *gin.Context) {
-	// Для лабораторной работы просто возвращаем успех
-	c.Status(http.StatusNoContent)
-}
-
-// GET /api/users/me - получение данных пользователя
-func (h *Handler) APIGetMe(c *gin.Context) {
-	// Для лабораторной работы используем захардкоженного пользователя
-	user, err := h.Repository.GetUserByID(hardcodedUserID)
-	if err != nil {
-		h.errorHandler(c, http.StatusNotFound, err)
-		return
-	}
-
-	userDTO := ds.UserDTO{
-		ID:        user.ID,
-		Username:  user.Username,
-		Moderator: user.Moderator,
-	}
-
-	c.JSON(http.StatusOK, userDTO)
-}
-
-// PUT /api/users/me - обновление данных пользователя
-func (h *Handler) APIUpdateMe(c *gin.Context) {
-	var req ds.UserUpdateRequest
-	if err := c.BindJSON(&req); err != nil {
-		h.errorHandler(c, http.StatusBadRequest, err)
-		return
-	}
-
-	// Для лабораторной работы используем захардкоженного пользователя
-	if err := h.Repository.UpdateUser(hardcodedUserID, req); err != nil {
-		h.errorHandler(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.Status(http.StatusNoContent)
+func (h *Handler) Logout(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Деавторизация прошла успешно",
+	})
 }

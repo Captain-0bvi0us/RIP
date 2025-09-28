@@ -10,7 +10,7 @@ import (
 )
 
 // GET /api/frax/cart - иконка корзины
-func (h *Handler) APIGetCartBadge(c *gin.Context) {
+func (h *Handler) GetCartBadge(c *gin.Context) {
 	draft, err := h.Repository.GetDraftFrax(hardcodedUserID)
 	if err != nil {
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
@@ -37,9 +37,9 @@ func (h *Handler) APIGetCartBadge(c *gin.Context) {
 }
 
 // GET /api/frax - список заявок с фильтрацией
-func (h *Handler) APIListFrax(c *gin.Context) {
+func (h *Handler) ListFrax(c *gin.Context) {
 	status := c.Query("status")
-	from := c.Query("from") // YYYY-MM-DD
+	from := c.Query("from")
 	to := c.Query("to")
 
 	fraxList, err := h.Repository.FraxListFiltered(status, from, to)
@@ -52,7 +52,7 @@ func (h *Handler) APIListFrax(c *gin.Context) {
 }
 
 // GET /api/frax/:id - одна заявка с услугами
-func (h *Handler) APIGetFrax(c *gin.Context) {
+func (h *Handler) GetFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -82,8 +82,8 @@ func (h *Handler) APIGetFrax(c *gin.Context) {
 		ID:             frax.ID,
 		Status:         frax.Status,
 		CreationDate:   frax.CreationDate,
-		CreatorLogin:   frax.Creator.Username,
-		ModeratorLogin: nil,
+		CreatorID:      frax.Creator.ID,
+		ModeratorID:    nil,
 		FormingDate:    frax.FormingDate,
 		ComplitionDate: frax.ComplitionDate,
 		Age:            frax.Age,
@@ -96,14 +96,14 @@ func (h *Handler) APIGetFrax(c *gin.Context) {
 	}
 
 	if frax.ModeratorID != nil {
-		fraxDTO.ModeratorLogin = &frax.Moderator.Username
+		fraxDTO.ModeratorID = &frax.Moderator.ID
 	}
 
 	c.JSON(http.StatusOK, fraxDTO)
 }
 
 // PUT /api/frax/:id - изменение полей заявки
-func (h *Handler) APIUpdateFrax(c *gin.Context) {
+func (h *Handler) UpdateFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -125,7 +125,7 @@ func (h *Handler) APIUpdateFrax(c *gin.Context) {
 }
 
 // PUT /api/frax/:id/form - сформировать заявку
-func (h *Handler) APIFormFrax(c *gin.Context) {
+func (h *Handler) FormFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -141,7 +141,7 @@ func (h *Handler) APIFormFrax(c *gin.Context) {
 }
 
 // PUT /api/frax/:id/resolve - завершить/отклонить заявку
-func (h *Handler) APIResolveFrax(c *gin.Context) {
+func (h *Handler) ResolveFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -154,8 +154,7 @@ func (h *Handler) APIResolveFrax(c *gin.Context) {
 		return
 	}
 
-	// Для лабораторной работы используем модератора с ID=2
-	moderatorID := uint(2)
+	moderatorID := uint(hardcodedUserID)
 	if err := h.Repository.ResolveFrax(uint(id), moderatorID, req.Action); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
@@ -165,7 +164,7 @@ func (h *Handler) APIResolveFrax(c *gin.Context) {
 }
 
 // DELETE /api/frax/:id - удаление заявки
-func (h *Handler) APIDeleteFrax(c *gin.Context) {
+func (h *Handler) DeleteFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -181,7 +180,7 @@ func (h *Handler) APIDeleteFrax(c *gin.Context) {
 }
 
 // DELETE /api/frax/:id/factors/:factor_id - удаление фактора из заявки
-func (h *Handler) APIRemoveFactorFromFrax(c *gin.Context) {
+func (h *Handler) RemoveFactorFromFrax(c *gin.Context) {
 	fraxID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -203,7 +202,7 @@ func (h *Handler) APIRemoveFactorFromFrax(c *gin.Context) {
 }
 
 // PUT /api/frax/:id/factors/:factor_id - изменение м-м связи
-func (h *Handler) APIUpdateMM(c *gin.Context) {
+func (h *Handler) UpdateMM(c *gin.Context) {
 	fraxID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)

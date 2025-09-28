@@ -27,28 +27,28 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 	r.POST("/factors", h.CreateFactor)
 	r.PUT("/factors/:id", h.UpdateFactor)
 	r.DELETE("/factors/:id", h.DeleteFactor)
-	r.POST("/frax/draft/factors/:factor_id", h.APIAddFactorToDraft)
+	r.POST("/frax/draft/factors/:factor_id", h.AddFactorToDraft)
 	r.POST("/factors/:id/image", h.UploadFactorImage)
 
 	// Домен заявок (FRAX)
-	r.GET("/frax/cart", h.APIGetCartBadge)
-	r.GET("/frax", h.APIListFrax)
-	r.GET("/frax/:id", h.APIGetFrax)
-	r.PUT("/frax/:id", h.APIUpdateFrax)
-	r.PUT("/frax/:id/form", h.APIFormFrax)
-	r.PUT("/frax/:id/resolve", h.APIResolveFrax)
-	r.DELETE("/frax/:id", h.APIDeleteFrax)
+	r.GET("/frax/cart", h.GetCartBadge)
+	r.GET("/frax", h.ListFrax)
+	r.GET("/frax/:id", h.GetFrax)
+	r.PUT("/frax/:id", h.UpdateFrax)
+	r.PUT("/frax/:id/form", h.FormFrax)
+	r.PUT("/frax/:id/resolve", h.ResolveFrax)
+	r.DELETE("/frax/:id", h.DeleteFrax)
 
 	// Домен м-м
-	r.DELETE("/frax/:id/factors/:factor_id", h.APIRemoveFactorFromFrax)
-	r.PUT("/frax/:id/factors/:factor_id", h.APIUpdateMM)
+	r.DELETE("/frax/:id/factors/:factor_id", h.RemoveFactorFromFrax)
+	r.PUT("/frax/:id/factors/:factor_id", h.UpdateMM)
 
 	// Домен пользователь
-	r.POST("/users", h.APIRegister)
-	r.POST("/auth/login", h.APILogin)
-	r.POST("/auth/logout", h.APILogout)
-	r.GET("/users/me", h.APIGetMe)
-	r.PUT("/users/me", h.APIUpdateMe)
+	r.POST("/users", h.Register)
+	r.GET("/users/:id", h.GetUserData)
+	r.PUT("/users/:id", h.UpdateUserData)
+	r.POST("/auth/login", h.Login)
+	r.POST("/auth/logout", h.Logout)
 }
 
 func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
