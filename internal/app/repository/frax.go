@@ -200,7 +200,7 @@ func (r *Repository) calculateFRAX(frax ds.FraxSearching) (float64, float64) {
 	age := float64(*frax.Age)
 	gender := 0.0
 	if *frax.Gender {
-		gender = 0.8
+		gender = 1.5
 	} else {
 		gender = 1.0
 	}

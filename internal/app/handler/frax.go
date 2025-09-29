@@ -68,7 +68,6 @@ func (h *Handler) GetFrax(c *gin.Context) {
 	var factors []ds.FactorInFraxDTO
 	for _, link := range frax.FactorsLink {
 		factors = append(factors, ds.FactorInFraxDTO{
-			ID:          link.ID,
 			FactorID:    link.FactorID,
 			Title:       link.Factor.Title,
 			Text:        link.Factor.Text,

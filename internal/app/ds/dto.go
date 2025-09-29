@@ -41,7 +41,6 @@ type FraxDTO struct {
 }
 
 type FactorInFraxDTO struct {
-	ID          uint     `json:"id"`
 	FactorID    uint     `json:"factor_id"`
 	Title       string   `json:"title"`
 	Text        string   `json:"text"`
