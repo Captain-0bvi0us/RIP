@@ -141,7 +141,9 @@ func (h *Handler) DeleteFactor(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Фактор удален",
+	})
 }
 
 // POST /api/frax/draft/factors/:factor_id - добавление фактора в черновик
@@ -157,7 +159,9 @@ func (h *Handler) AddFactorToDraft(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Черновик создан. Фактор добавлен в черновик.",
+	})
 }
 
 // POST /api/factors/:id/image - загрузка изображения фактора

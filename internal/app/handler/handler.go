@@ -19,7 +19,6 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-// Регистрация только API роутов
 func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 	// Домен услуг (факторов)
 	r.GET("/factors", h.GetFactors)

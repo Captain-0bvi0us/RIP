@@ -120,7 +120,9 @@ func (h *Handler) UpdateFrax(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Данные заявки обновлены",
+	})
 }
 
 // PUT /api/frax/:id/form - сформировать заявку
@@ -136,7 +138,9 @@ func (h *Handler) FormFrax(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Заявка сформирована",
+	})
 }
 
 // PUT /api/frax/:id/resolve - завершить/отклонить заявку
@@ -159,7 +163,9 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Заявка обработана модератором",
+	})
 }
 
 // DELETE /api/frax/:id - удаление заявки
@@ -175,7 +181,9 @@ func (h *Handler) DeleteFrax(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Заявка удалена",
+	})
 }
 
 // DELETE /api/frax/:id/factors/:factor_id - удаление фактора из заявки
@@ -197,7 +205,9 @@ func (h *Handler) RemoveFactorFromFrax(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Фактор удален из заявки",
+	})
 }
 
 // PUT /api/frax/:id/factors/:factor_id - изменение м-м связи
@@ -229,5 +239,7 @@ func (h *Handler) UpdateMM(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Дополнительная информация к фаткору обновлена",
+	})
 }

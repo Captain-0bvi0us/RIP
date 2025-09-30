@@ -85,7 +85,9 @@ func (h *Handler) UpdateUserData(c *gin.Context) {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Данные пользователя обновлены",
+	})
 }
 
 // POST /api/auth/login - аутентификация
