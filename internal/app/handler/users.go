@@ -110,7 +110,7 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	response := ds.LoginResponse{
-		Token: "the_really_good_token",
+		Token: "wanderful",
 		User: ds.UserDTO{
 			ID:        user.ID,
 			Username:  user.Username,

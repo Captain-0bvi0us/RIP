@@ -27,7 +27,6 @@ func NewApp(c *config.Config, r *gin.Engine, h *handler.Handler) *Application {
 func (a *Application) RunApp() {
 	logrus.Info("Server start up")
 
-	// Регистрируем только API роуты
 	api := a.Router.Group("/api")
 	a.Handler.RegisterAPI(api)
 

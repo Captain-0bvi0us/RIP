@@ -30,7 +30,7 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 	r.POST("/factors/:id/image", h.UploadFactorImage)
 
 	// Домен заявок (FRAX)
-	r.GET("/frax/cart", h.GetCartBadge)
+	r.GET("/frax/fraxcart", h.GetCartBadge)
 	r.GET("/frax", h.ListFrax)
 	r.GET("/frax/:id", h.GetFrax)
 	r.PUT("/frax/:id", h.UpdateFrax)
