@@ -9,6 +9,18 @@ import (
 )
 
 // GET /api/factors - список факторов с фильтрацией
+
+// GetFactors godoc
+// @Summary      Получить список факторов
+// @Description  Возвращает постраничный список факторов риска. Доступен для всех авторизованных пользователей.
+// @Tags         factors
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        title query string false "Фильтр по названию фактора (поиск по подстроке)"
+// @Success      200 {object} ds.PaginatedResponse
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router       /factors [get]
 func (h *Handler) GetFactors(c *gin.Context) {
 	title := c.Query("title")
 
@@ -37,6 +49,18 @@ func (h *Handler) GetFactors(c *gin.Context) {
 }
 
 // GET /api/factors/:id - один фактор
+
+// GetFactor godoc
+// @Summary      Получить один фактор по ID
+// @Description  Возвращает детальную информацию о факторе риска.
+// @Tags         factors
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID фактора"
+// @Success      200 {object} ds.FactorDTO
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      404 {object} map[string]string "Фактор не найден"
+// @Router       /factors/{id} [get]
 func (h *Handler) GetFactor(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -63,6 +87,20 @@ func (h *Handler) GetFactor(c *gin.Context) {
 }
 
 // POST /api/factors - создание фактора
+
+// CreateFactor godoc
+// @Summary      Создать новый фактор (только модератор)
+// @Description  Создает новую запись о факторе риска. Доступно только для модераторов.
+// @Tags         factors
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        factorData body ds.FactorCreateRequest true "Данные нового фактора"
+// @Success      201 {object} ds.FactorDTO
+// @Failure      400 {object} map[string]string "Ошибка валидации"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен (не модератор)"
+// @Router       /factors [post]
 func (h *Handler) CreateFactor(c *gin.Context) {
 	var req ds.FactorCreateRequest
 	if err := c.BindJSON(&req); err != nil {
@@ -97,6 +135,21 @@ func (h *Handler) CreateFactor(c *gin.Context) {
 }
 
 // PUT /api/factors/:id - обновление фактора
+
+// UpdateFactor godoc
+// @Summary      Обновить фактор (только модератор)
+// @Description  Обновляет информацию о существующем факторе риска.
+// @Tags         factors
+// @Accept       json
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID фактора"
+// @Param        updateData body ds.FactorUpdateRequest true "Данные для обновления"
+// @Success      200 {object} ds.FactorDTO
+// @Failure      400 {object} map[string]string "Ошибка валидации"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /factors/{id} [put]
 func (h *Handler) UpdateFactor(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -129,6 +182,17 @@ func (h *Handler) UpdateFactor(c *gin.Context) {
 }
 
 // DELETE /api/factors/:id - удаление фактора
+
+// DeleteFactor godoc
+// @Summary      Удалить фактор (только модератор)
+// @Description  Удаляет фактор риска из системы.
+// @Tags         factors
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID фактора для удаления"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /factors/{id} [delete]
 func (h *Handler) DeleteFactor(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -147,6 +211,17 @@ func (h *Handler) DeleteFactor(c *gin.Context) {
 }
 
 // POST /api/frax/draft/factors/:factor_id - добавление фактора в черновик
+
+// AddFactorToDraft godoc
+// @Summary      Добавить фактор в черновик заявки
+// @Description  Находит или создает черновик заявки для текущего пользователя и добавляет в него фактор.
+// @Tags         frax
+// @Security     ApiKeyAuth
+// @Param        factor_id path int true "ID фактора для добавления"
+// @Success      201 {object} map[string]string "Сообщение об успехе"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router       /frax/draft/factors/{factor_id} [post]
 func (h *Handler) AddFactorToDraft(c *gin.Context) {
 	factorID, err := strconv.Atoi(c.Param("factor_id"))
 	if err != nil {
@@ -154,7 +229,13 @@ func (h *Handler) AddFactorToDraft(c *gin.Context) {
 		return
 	}
 
-	if err := h.Repository.AddFactorToDraft(hardcodedUserID, uint(factorID)); err != nil {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	if err := h.Repository.AddFactorToDraft(userID, uint(factorID)); err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -165,6 +246,21 @@ func (h *Handler) AddFactorToDraft(c *gin.Context) {
 }
 
 // POST /api/factors/:id/image - загрузка изображения фактора
+
+// UploadFactorImage godoc
+// @Summary      Загрузить изображение для фактора (только модератор)
+// @Description  Загружает и привязывает изображение к фактору риска.
+// @Tags         factors
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID фактора"
+// @Param        file formData file true "Файл изображения"
+// @Success      200 {object} map[string]string "URL загруженного изображения"
+// @Failure      400 {object} map[string]string "Файл не предоставлен"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /factors/{id}/image [post]
 func (h *Handler) UploadFactorImage(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

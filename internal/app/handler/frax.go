@@ -10,8 +10,24 @@ import (
 )
 
 // GET /api/frax/cart - иконка корзины
+
+// GetCartBadge godoc
+// @Summary      Получить информацию для иконки корзины
+// @Description  Возвращает ID черновика текущего пользователя и количество факторов в нем.
+// @Tags         frax
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {object} ds.CartBadgeDTO
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax/cart [get]
 func (h *Handler) GetCartBadge(c *gin.Context) {
-	draft, err := h.Repository.GetDraftFrax(hardcodedUserID)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	draft, err := h.Repository.GetDraftFrax(userID)
 	if err != nil {
 		c.JSON(http.StatusOK, ds.CartBadgeDTO{
 			FraxID: nil,
@@ -37,6 +53,19 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 }
 
 // GET /api/frax - список заявок с фильтрацией
+
+// ListFrax godoc
+// @Summary      Получить список заявок
+// @Description  Возвращает отфильтрованный список всех сформированных заявок (кроме черновиков и удаленных).
+// @Tags         frax
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        status query int false "Фильтр по статусу заявки"
+// @Param        from query string false "Фильтр по дате 'от' (формат YYYY-MM-DD)"
+// @Param        to query string false "Фильтр по дате 'до' (формат YYYY-MM-DD)"
+// @Success      200 {array} ds.FraxDTO
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax [get]
 func (h *Handler) ListFrax(c *gin.Context) {
 	status := c.Query("status")
 	from := c.Query("from")
@@ -52,6 +81,18 @@ func (h *Handler) ListFrax(c *gin.Context) {
 }
 
 // GET /api/frax/:id - одна заявка с услугами
+
+// GetFrax godoc
+// @Summary      Получить одну заявку по ID
+// @Description  Возвращает полную информацию о заявке, включая привязанные факторы.
+// @Tags         frax
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Success      200 {object} ds.FraxDTO
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      404 {object} map[string]string "Заявка не найдена"
+// @Router       /frax/{id} [get]
 func (h *Handler) GetFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -102,6 +143,18 @@ func (h *Handler) GetFrax(c *gin.Context) {
 }
 
 // PUT /api/frax/:id - изменение полей заявки
+
+// UpdateFrax godoc
+// @Summary      Обновить данные заявки
+// @Description  Позволяет пользователю обновить поля своей заявки (возраст, пол, вес, рост).
+// @Tags         frax
+// @Accept       json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        updateData body ds.FraxUpdateRequest true "Данные для обновления"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax/{id} [put]
 func (h *Handler) UpdateFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -126,6 +179,17 @@ func (h *Handler) UpdateFrax(c *gin.Context) {
 }
 
 // PUT /api/frax/:id/form - сформировать заявку
+
+// FormFrax godoc
+// @Summary      Сформировать заявку
+// @Description  Переводит заявку из статуса "черновик" в "сформирована".
+// @Tags         frax
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки (черновика)"
+// @Success      204 "No Content"
+// @Failure      400 {object} map[string]string "Не все поля заполнены"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax/{id}/form [put]
 func (h *Handler) FormFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -133,7 +197,13 @@ func (h *Handler) FormFrax(c *gin.Context) {
 		return
 	}
 
-	if err := h.Repository.FormFrax(uint(id), hardcodedUserID); err != nil {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	if err := h.Repository.FormFrax(uint(id), userID); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
@@ -144,6 +214,19 @@ func (h *Handler) FormFrax(c *gin.Context) {
 }
 
 // PUT /api/frax/:id/resolve - завершить/отклонить заявку
+
+// ResolveFrax godoc
+// @Summary      Завершить или отклонить заявку (только модератор)
+// @Description  Модератор завершает (с расчетом) или отклоняет заявку.
+// @Tags         frax
+// @Accept       json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        action body ds.FraxResolveRequest true "Действие: 'complete' или 'reject'"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /frax/{id}/resolve [put]
 func (h *Handler) ResolveFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -157,7 +240,13 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 		return
 	}
 
-	moderatorID := uint(hardcodedUserID)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	moderatorID := uint(userID)
 	if err := h.Repository.ResolveFrax(uint(id), moderatorID, req.Action); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
@@ -169,6 +258,16 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 }
 
 // DELETE /api/frax/:id - удаление заявки
+
+// DeleteFrax godoc
+// @Summary      Удалить заявку
+// @Description  Логически удаляет заявку, переводя ее в статус "удалена".
+// @Tags         frax
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax/{id} [delete]
 func (h *Handler) DeleteFrax(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -187,6 +286,17 @@ func (h *Handler) DeleteFrax(c *gin.Context) {
 }
 
 // DELETE /api/frax/:id/factors/:factor_id - удаление фактора из заявки
+
+// RemoveFactorFromFrax godoc
+// @Summary      Удалить фактор из заявки
+// @Description  Удаляет связь между заявкой и фактором.
+// @Tags         frax
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        factor_id path int true "ID фактора"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax/{id}/factors/{factor_id} [delete]
 func (h *Handler) RemoveFactorFromFrax(c *gin.Context) {
 	fraxID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -211,6 +321,19 @@ func (h *Handler) RemoveFactorFromFrax(c *gin.Context) {
 }
 
 // PUT /api/frax/:id/factors/:factor_id - изменение м-м связи
+
+// UpdateMM godoc
+// @Summary      Обновить описание фактора в заявке
+// @Description  Изменяет дополнительное описание для конкретного фактора в рамках одной заявки.
+// @Tags         frax
+// @Accept       json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        factor_id path int true "ID фактора"
+// @Param        updateData body ds.FactorToFraxUpdateRequest true "Новое описание"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax/{id}/factors/{factor_id} [put]
 func (h *Handler) UpdateMM(c *gin.Context) {
 	fraxID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

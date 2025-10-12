@@ -1,0 +1,886 @@
+basePath: /api
+definitions:
+  ds.CartBadgeDTO:
+    properties:
+      count:
+        type: integer
+      frax_id:
+        type: integer
+    type: object
+  ds.FactorCreateRequest:
+    properties:
+      argument:
+        type: number
+      text:
+        type: string
+      title:
+        type: string
+    required:
+    - text
+    - title
+    type: object
+  ds.FactorDTO:
+    properties:
+      argument:
+        type: number
+      id:
+        type: integer
+      image:
+        type: string
+      status:
+        type: boolean
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  ds.FactorInFraxDTO:
+    properties:
+      argument:
+        type: number
+      description:
+        type: string
+      factor_id:
+        type: integer
+      image:
+        type: string
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  ds.FactorToFraxUpdateRequest:
+    properties:
+      description:
+        type: string
+    type: object
+  ds.FactorUpdateRequest:
+    properties:
+      argument:
+        type: number
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  ds.FraxDTO:
+    properties:
+      PHF:
+        type: number
+      POF:
+        type: number
+      age:
+        type: integer
+      complition_date:
+        type: string
+      creation_date:
+        type: string
+      creator_login:
+        type: integer
+      factors:
+        items:
+          $ref: '#/definitions/ds.FactorInFraxDTO'
+        type: array
+      forming_date:
+        type: string
+      gender:
+        type: boolean
+      height:
+        type: integer
+      id:
+        type: integer
+      moderator_login:
+        type: integer
+      status:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  ds.FraxResolveRequest:
+    properties:
+      action:
+        description: '"complete" | "reject"'
+        type: string
+    required:
+    - action
+    type: object
+  ds.FraxUpdateRequest:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: boolean
+      height:
+        type: integer
+      weight:
+        type: integer
+    type: object
+  ds.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/ds.UserDTO'
+    type: object
+  ds.PaginatedResponse:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
+  ds.UserDTO:
+    properties:
+      id:
+        type: integer
+      moderator:
+        type: boolean
+      username:
+        type: string
+    type: object
+  ds.UserLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  ds.UserRegisterRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  ds.UserUpdateRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8090
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: API-сервер для управления заявками и факторами риска в системе FRAX.
+  title: API для системы FRAX
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Получение JWT токена по логину и паролю для доступа к защищенным
+        эндпоинтам.
+      parameters:
+      - description: Учетные данные пользователя
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.LoginResponse'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Неверные учетные данные
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Добавляет текущий JWT токен в черный список, делая его недействительным.
+        Требует авторизации.
+      responses:
+        "200":
+          description: Сообщение об успехе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Выход из системы (деавторизация)
+      tags:
+      - auth
+  /factors:
+    get:
+      description: Возвращает постраничный список факторов риска. Доступен для всех
+        авторизованных пользователей.
+      parameters:
+      - description: Фильтр по названию фактора (поиск по подстроке)
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PaginatedResponse'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить список факторов
+      tags:
+      - factors
+    post:
+      consumes:
+      - application/json
+      description: Создает новую запись о факторе риска. Доступно только для модераторов.
+      parameters:
+      - description: Данные нового фактора
+        in: body
+        name: factorData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.FactorCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.FactorDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (не модератор)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создать новый фактор (только модератор)
+      tags:
+      - factors
+  /factors/{id}:
+    delete:
+      description: Удаляет фактор риска из системы.
+      parameters:
+      - description: ID фактора для удаления
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить фактор (только модератор)
+      tags:
+      - factors
+    get:
+      description: Возвращает детальную информацию о факторе риска.
+      parameters:
+      - description: ID фактора
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.FactorDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Фактор не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить один фактор по ID
+      tags:
+      - factors
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о существующем факторе риска.
+      parameters:
+      - description: ID фактора
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.FactorUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.FactorDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить фактор (только модератор)
+      tags:
+      - factors
+  /factors/{id}/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает и привязывает изображение к фактору риска.
+      parameters:
+      - description: ID фактора
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Файл изображения
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: URL загруженного изображения
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Файл не предоставлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Загрузить изображение для фактора (только модератор)
+      tags:
+      - factors
+  /frax:
+    get:
+      description: Возвращает отфильтрованный список всех сформированных заявок (кроме
+        черновиков и удаленных).
+      parameters:
+      - description: Фильтр по статусу заявки
+        in: query
+        name: status
+        type: integer
+      - description: Фильтр по дате 'от' (формат YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: Фильтр по дате 'до' (формат YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ds.FraxDTO'
+            type: array
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить список заявок
+      tags:
+      - frax
+  /frax/{id}:
+    delete:
+      description: Логически удаляет заявку, переводя ее в статус "удалена".
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить заявку
+      tags:
+      - frax
+    get:
+      description: Возвращает полную информацию о заявке, включая привязанные факторы.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.FraxDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Заявка не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить одну заявку по ID
+      tags:
+      - frax
+    put:
+      consumes:
+      - application/json
+      description: Позволяет пользователю обновить поля своей заявки (возраст, пол,
+        вес, рост).
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.FraxUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить данные заявки
+      tags:
+      - frax
+  /frax/{id}/factors/{factor_id}:
+    delete:
+      description: Удаляет связь между заявкой и фактором.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID фактора
+        in: path
+        name: factor_id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить фактор из заявки
+      tags:
+      - frax
+    put:
+      consumes:
+      - application/json
+      description: Изменяет дополнительное описание для конкретного фактора в рамках
+        одной заявки.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID фактора
+        in: path
+        name: factor_id
+        required: true
+        type: integer
+      - description: Новое описание
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.FactorToFraxUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить описание фактора в заявке
+      tags:
+      - frax
+  /frax/{id}/form:
+    put:
+      description: Переводит заявку из статуса "черновик" в "сформирована".
+      parameters:
+      - description: ID заявки (черновика)
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Не все поля заполнены
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Сформировать заявку
+      tags:
+      - frax
+  /frax/{id}/resolve:
+    put:
+      consumes:
+      - application/json
+      description: Модератор завершает (с расчетом) или отклоняет заявку.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Действие: ''complete'' или ''reject'''
+        in: body
+        name: action
+        required: true
+        schema:
+          $ref: '#/definitions/ds.FraxResolveRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Завершить или отклонить заявку (только модератор)
+      tags:
+      - frax
+  /frax/cart:
+    get:
+      description: Возвращает ID черновика текущего пользователя и количество факторов
+        в нем.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.CartBadgeDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить информацию для иконки корзины
+      tags:
+      - frax
+  /frax/draft/factors/{factor_id}:
+    post:
+      description: Находит или создает черновик заявки для текущего пользователя и
+        добавляет в него фактор.
+      parameters:
+      - description: ID фактора для добавления
+        in: path
+        name: factor_id
+        required: true
+        type: integer
+      responses:
+        "201":
+          description: Сообщение об успехе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Добавить фактор в черновик заявки
+      tags:
+      - frax
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя в системе. По умолчанию роль "пользователь",
+        не "модератор".
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.UserDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация нового пользователя
+      tags:
+      - auth
+  /users/{id}:
+    get:
+      description: Возвращает публичные данные пользователя. Требует авторизации.
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.UserDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получение данных пользователя по ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновляет имя пользователя или пароль. Требует авторизации.
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UserUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновление данных пользователя
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
