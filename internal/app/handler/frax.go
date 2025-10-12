@@ -12,7 +12,7 @@ import (
 // GET /api/frax/cart - иконка корзины
 
 // GetCartBadge godoc
-// @Summary      Получить информацию для иконки корзины
+// @Summary      Получить информацию для иконки корзины (авторизованный пользователь)
 // @Description  Возвращает ID черновика текущего пользователя и количество факторов в нем.
 // @Tags         frax
 // @Produce      json
@@ -55,7 +55,7 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 // GET /api/frax - список заявок с фильтрацией
 
 // ListFrax godoc
-// @Summary      Получить список заявок
+// @Summary      Получить список заявок (авторизованный пользователь)
 // @Description  Возвращает отфильтрованный список всех сформированных заявок (кроме черновиков и удаленных).
 // @Tags         frax
 // @Produce      json
@@ -67,11 +67,18 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Router       /frax [get]
 func (h *Handler) ListFrax(c *gin.Context) {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+	isModerator := isUserModerator(c)
+
 	status := c.Query("status")
 	from := c.Query("from")
 	to := c.Query("to")
 
-	fraxList, err := h.Repository.FraxListFiltered(status, from, to)
+	fraxList, err := h.Repository.FraxListFiltered(userID, isModerator, status, from, to)
 	if err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
@@ -83,7 +90,7 @@ func (h *Handler) ListFrax(c *gin.Context) {
 // GET /api/frax/:id - одна заявка с услугами
 
 // GetFrax godoc
-// @Summary      Получить одну заявку по ID
+// @Summary      Получить одну заявку по ID (авторизованный пользователь)
 // @Description  Возвращает полную информацию о заявке, включая привязанные факторы.
 // @Tags         frax
 // @Produce      json
@@ -145,7 +152,7 @@ func (h *Handler) GetFrax(c *gin.Context) {
 // PUT /api/frax/:id - изменение полей заявки
 
 // UpdateFrax godoc
-// @Summary      Обновить данные заявки
+// @Summary      Обновить данные заявки (авторизованный пользователь)
 // @Description  Позволяет пользователю обновить поля своей заявки (возраст, пол, вес, рост).
 // @Tags         frax
 // @Accept       json
@@ -181,7 +188,7 @@ func (h *Handler) UpdateFrax(c *gin.Context) {
 // PUT /api/frax/:id/form - сформировать заявку
 
 // FormFrax godoc
-// @Summary      Сформировать заявку
+// @Summary      Сформировать заявку (авторизованный пользователь)
 // @Description  Переводит заявку из статуса "черновик" в "сформирована".
 // @Tags         frax
 // @Security     ApiKeyAuth
@@ -260,7 +267,7 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 // DELETE /api/frax/:id - удаление заявки
 
 // DeleteFrax godoc
-// @Summary      Удалить заявку
+// @Summary      Удалить заявку (авторизованный пользователь)
 // @Description  Логически удаляет заявку, переводя ее в статус "удалена".
 // @Tags         frax
 // @Security     ApiKeyAuth
@@ -288,9 +295,9 @@ func (h *Handler) DeleteFrax(c *gin.Context) {
 // DELETE /api/frax/:id/factors/:factor_id - удаление фактора из заявки
 
 // RemoveFactorFromFrax godoc
-// @Summary      Удалить фактор из заявки
+// @Summary      Удалить фактор из заявки (авторизованный пользователь)
 // @Description  Удаляет связь между заявкой и фактором.
-// @Tags         frax
+// @Tags         m-m
 // @Security     ApiKeyAuth
 // @Param        id path int true "ID заявки"
 // @Param        factor_id path int true "ID фактора"
@@ -323,9 +330,9 @@ func (h *Handler) RemoveFactorFromFrax(c *gin.Context) {
 // PUT /api/frax/:id/factors/:factor_id - изменение м-м связи
 
 // UpdateMM godoc
-// @Summary      Обновить описание фактора в заявке
+// @Summary      Обновить описание фактора в заявке (авторизованный пользователь)
 // @Description  Изменяет дополнительное описание для конкретного фактора в рамках одной заявки.
-// @Tags         frax
+// @Tags         m-m
 // @Accept       json
 // @Security     ApiKeyAuth
 // @Param        id path int true "ID заявки"

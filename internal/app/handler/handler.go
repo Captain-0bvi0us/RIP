@@ -24,11 +24,14 @@ func NewHandler(r *repository.Repository, redis *redis.Client, jwtConfig *config
 }
 
 func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
-	// Аутентификация - доступна всем
+
+	// Доступны всем
 	r.POST("/users", h.Register)
 	r.POST("/auth/login", h.Login)
+	r.GET("/factors", h.GetFactors)
+	r.GET("/factors/:id", h.GetFactor)
 
-	// Эндпоинты, доступные всем авторизованным пользователям
+	// Эндпоинты, доступные только авторизованным пользователям
 	auth := r.Group("/")
 	auth.Use(h.AuthMiddleware)
 	{
@@ -36,10 +39,6 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		auth.POST("/auth/logout", h.Logout)
 		auth.GET("/users/:id", h.GetUserData)
 		auth.PUT("/users/:id", h.UpdateUserData)
-
-		// Факторы
-		auth.GET("/factors", h.GetFactors)
-		auth.GET("/factors/:id", h.GetFactor)
 
 		// Заявки
 		auth.POST("/frax/draft/factors/:factor_id", h.AddFactorToDraft)

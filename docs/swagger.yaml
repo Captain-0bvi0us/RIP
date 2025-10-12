@@ -130,6 +130,8 @@ definitions:
     type: object
   ds.UserDTO:
     properties:
+      full_name:
+        type: string
       id:
         type: integer
       moderator:
@@ -149,16 +151,21 @@ definitions:
     type: object
   ds.UserRegisterRequest:
     properties:
+      full_name:
+        type: string
       password:
         type: string
       username:
         type: string
     required:
+    - full_name
     - password
     - username
     type: object
   ds.UserUpdateRequest:
     properties:
+      full_name:
+        type: string
       password:
         type: string
       username:
@@ -205,7 +212,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Аутентификация пользователя
+      summary: Аутентификация пользователя (все)
       tags:
       - auth
   /auth/logout:
@@ -227,15 +234,14 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Выход из системы (деавторизация)
+      summary: Выход из системы (авторизованный пользователь)
       tags:
       - auth
   /factors:
     get:
-      description: Возвращает постраничный список факторов риска. Доступен для всех
-        авторизованных пользователей.
+      description: Возвращает постраничный список факторов риска.
       parameters:
-      - description: Фильтр по названию фактора (поиск по подстроке)
+      - description: Фильтр по названию фактора
         in: query
         name: title
         type: string
@@ -246,27 +252,19 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ds.PaginatedResponse'
-        "401":
-          description: Необходима авторизация
-          schema:
-            additionalProperties:
-              type: string
-            type: object
         "500":
           description: Внутренняя ошибка сервера
           schema:
             additionalProperties:
               type: string
             type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Получить список факторов
+      summary: Получить список факторов (все)
       tags:
       - factors
     post:
       consumes:
       - application/json
-      description: Создает новую запись о факторе риска. Доступно только для модераторов.
+      description: Создает новую запись о факторе риска.
       parameters:
       - description: Данные нового фактора
         in: body
@@ -348,21 +346,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ds.FactorDTO'
-        "401":
-          description: Необходима авторизация
-          schema:
-            additionalProperties:
-              type: string
-            type: object
         "404":
           description: Фактор не найден
           schema:
             additionalProperties:
               type: string
             type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Получить один фактор по ID
+      summary: Получить один фактор по ID (все)
       tags:
       - factors
     put:
@@ -493,7 +483,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Получить список заявок
+      summary: Получить список заявок (авторизованный пользователь)
       tags:
       - frax
   /frax/{id}:
@@ -516,7 +506,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Удалить заявку
+      summary: Удалить заявку (авторизованный пользователь)
       tags:
       - frax
     get:
@@ -548,7 +538,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Получить одну заявку по ID
+      summary: Получить одну заявку по ID (авторизованный пользователь)
       tags:
       - frax
     put:
@@ -579,7 +569,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Обновить данные заявки
+      summary: Обновить данные заявки (авторизованный пользователь)
       tags:
       - frax
   /frax/{id}/factors/{factor_id}:
@@ -607,9 +597,9 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Удалить фактор из заявки
+      summary: Удалить фактор из заявки (авторизованный пользователь)
       tags:
-      - frax
+      - m-m
     put:
       consumes:
       - application/json
@@ -643,9 +633,9 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Обновить описание фактора в заявке
+      summary: Обновить описание фактора в заявке (авторизованный пользователь)
       tags:
-      - frax
+      - m-m
   /frax/{id}/form:
     put:
       description: Переводит заявку из статуса "черновик" в "сформирована".
@@ -672,7 +662,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Сформировать заявку
+      summary: Сформировать заявку (авторизованный пользователь)
       tags:
       - frax
   /frax/{id}/resolve:
@@ -731,7 +721,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Получить информацию для иконки корзины
+      summary: Получить информацию для иконки корзины (авторизованный пользователь)
       tags:
       - frax
   /frax/draft/factors/{factor_id}:
@@ -765,9 +755,9 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Добавить фактор в черновик заявки
+      summary: Добавить фактор в черновик заявки (все)
       tags:
-      - frax
+      - factors
   /users:
     post:
       consumes:
@@ -800,7 +790,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Регистрация нового пользователя
+      summary: Регистрация нового пользователя (все)
       tags:
       - auth
   /users/{id}:
@@ -833,7 +823,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Получение данных пользователя по ID
+      summary: Получение данных пользователя по ID (авторизованный пользователь)
       tags:
       - users
     put:
@@ -875,7 +865,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Обновление данных пользователя
+      summary: Обновление данных пользователя (авторизованный пользователь)
       tags:
       - users
 securityDefinitions:

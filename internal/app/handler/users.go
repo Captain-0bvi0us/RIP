@@ -16,7 +16,7 @@ import (
 // POST /api/users - регистрация пользователя
 
 // Register godoc
-// @Summary      Регистрация нового пользователя
+// @Summary      Регистрация нового пользователя (все)
 // @Description  Создает нового пользователя в системе. По умолчанию роль "пользователь", не "модератор".
 // @Tags         auth
 // @Accept       json
@@ -40,6 +40,7 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 
 	user := ds.Users{
+		FullName:  req.FullName,
 		Username:  req.Username,
 		Password:  string(hashedPassword),
 		Moderator: false,
@@ -52,6 +53,7 @@ func (h *Handler) Register(c *gin.Context) {
 
 	userDTO := ds.UserDTO{
 		ID:        user.ID,
+		FullName:  user.FullName,
 		Username:  user.Username,
 		Moderator: user.Moderator,
 	}
@@ -62,7 +64,7 @@ func (h *Handler) Register(c *gin.Context) {
 // GET /api/users/:id - получение данных пользователя
 
 // GetUserData godoc
-// @Summary      Получение данных пользователя по ID
+// @Summary      Получение данных пользователя по ID (авторизованный пользователь)
 // @Description  Возвращает публичные данные пользователя. Требует авторизации.
 // @Tags         users
 // @Produce      json
@@ -89,6 +91,7 @@ func (h *Handler) GetUserData(c *gin.Context) {
 
 	userDTO := ds.UserDTO{
 		ID:        user.ID,
+		FullName:  user.FullName,
 		Username:  user.Username,
 		Moderator: user.Moderator,
 	}
@@ -98,7 +101,7 @@ func (h *Handler) GetUserData(c *gin.Context) {
 // PUT /api/users/:id - обновление данных пользователя
 
 // UpdateUserData godoc
-// @Summary      Обновление данных пользователя
+// @Summary      Обновление данных пользователя (авторизованный пользователь)
 // @Description  Обновляет имя пользователя или пароль. Требует авторизации.
 // @Tags         users
 // @Accept       json
@@ -135,7 +138,7 @@ func (h *Handler) UpdateUserData(c *gin.Context) {
 // POST /api/auth/login - аутентификация
 
 // Login godoc
-// @Summary      Аутентификация пользователя
+// @Summary      Аутентификация пользователя (все)
 // @Description  Получение JWT токена по логину и паролю для доступа к защищенным эндпоинтам.
 // @Tags         auth
 // @Accept       json
@@ -183,6 +186,7 @@ func (h *Handler) Login(c *gin.Context) {
 		Token: tokenString,
 		User: ds.UserDTO{
 			ID:        user.ID,
+			FullName:  user.FullName,
 			Username:  user.Username,
 			Moderator: user.Moderator,
 		},
@@ -194,7 +198,7 @@ func (h *Handler) Login(c *gin.Context) {
 // POST /api/auth/logout - деавторизация
 
 // Logout godoc
-// @Summary      Выход из системы (деавторизация)
+// @Summary      Выход из системы (авторизованный пользователь)
 // @Description  Добавляет текущий JWT токен в черный список, делая его недействительным. Требует авторизации.
 // @Tags         auth
 // @Security     ApiKeyAuth
@@ -218,18 +222,4 @@ func (h *Handler) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Деавторизация прошла успешно",
 	})
-}
-
-func getUserIDFromContext(c *gin.Context) (uint, error) {
-	value, exists := c.Get(userCtx)
-	if !exists {
-		return 0, errors.New("user ID not found in context")
-	}
-
-	userID, ok := value.(uint)
-	if !ok {
-		return 0, errors.New("invalid user ID type in context")
-	}
-
-	return userID, nil
 }

@@ -24,7 +24,7 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Аутентификация пользователя",
+                "summary": "Аутентификация пользователя (все)",
                 "parameters": [
                     {
                         "description": "Учетные данные пользователя",
@@ -75,7 +75,7 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Выход из системы (деавторизация)",
+                "summary": "Выход из системы (авторизованный пользователь)",
                 "responses": {
                     "200": {
                         "description": "Сообщение об успехе",
@@ -100,23 +100,18 @@
         },
         "/factors": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Возвращает постраничный список факторов риска. Доступен для всех авторизованных пользователей.",
+                "description": "Возвращает постраничный список факторов риска.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "factors"
                 ],
-                "summary": "Получить список факторов",
+                "summary": "Получить список факторов (все)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Фильтр по названию фактора (поиск по подстроке)",
+                        "description": "Фильтр по названию фактора",
                         "name": "title",
                         "in": "query"
                     }
@@ -126,15 +121,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/ds.PaginatedResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Необходима авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
                         }
                     },
                     "500": {
@@ -154,7 +140,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Создает новую запись о факторе риска. Доступно только для модераторов.",
+                "description": "Создает новую запись о факторе риска.",
                 "consumes": [
                     "application/json"
                 ],
@@ -215,11 +201,6 @@
         },
         "/factors/{id}": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Возвращает детальную информацию о факторе риска.",
                 "produces": [
                     "application/json"
@@ -227,7 +208,7 @@
                 "tags": [
                     "factors"
                 ],
-                "summary": "Получить один фактор по ID",
+                "summary": "Получить один фактор по ID (все)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -242,15 +223,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/ds.FactorDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "Необходима авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
                         }
                     },
                     "404": {
@@ -468,7 +440,7 @@
                 "tags": [
                     "frax"
                 ],
-                "summary": "Получить список заявок",
+                "summary": "Получить список заявок (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -525,7 +497,7 @@
                 "tags": [
                     "frax"
                 ],
-                "summary": "Получить информацию для иконки корзины",
+                "summary": "Получить информацию для иконки корзины (авторизованный пользователь)",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -554,9 +526,9 @@
                 ],
                 "description": "Находит или создает черновик заявки для текущего пользователя и добавляет в него фактор.",
                 "tags": [
-                    "frax"
+                    "factors"
                 ],
-                "summary": "Добавить фактор в черновик заявки",
+                "summary": "Добавить фактор в черновик заявки (все)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -611,7 +583,7 @@
                 "tags": [
                     "frax"
                 ],
-                "summary": "Получить одну заявку по ID",
+                "summary": "Получить одну заявку по ID (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -661,7 +633,7 @@
                 "tags": [
                     "frax"
                 ],
-                "summary": "Обновить данные заявки",
+                "summary": "Обновить данные заявки (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -705,7 +677,7 @@
                 "tags": [
                     "frax"
                 ],
-                "summary": "Удалить заявку",
+                "summary": "Удалить заявку (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -743,9 +715,9 @@
                     "application/json"
                 ],
                 "tags": [
-                    "frax"
+                    "m-m"
                 ],
-                "summary": "Обновить описание фактора в заявке",
+                "summary": "Обновить описание фактора в заявке (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -794,9 +766,9 @@
                 ],
                 "description": "Удаляет связь между заявкой и фактором.",
                 "tags": [
-                    "frax"
+                    "m-m"
                 ],
-                "summary": "Удалить фактор из заявки",
+                "summary": "Удалить фактор из заявки (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -840,7 +812,7 @@
                 "tags": [
                     "frax"
                 ],
-                "summary": "Сформировать заявку",
+                "summary": "Сформировать заявку (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -945,7 +917,7 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Регистрация нового пользователя",
+                "summary": "Регистрация нового пользователя (все)",
                 "parameters": [
                     {
                         "description": "Данные для регистрации",
@@ -999,7 +971,7 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "Получение данных пользователя по ID",
+                "summary": "Получение данных пользователя по ID (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1049,7 +1021,7 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "Обновление данных пользователя",
+                "summary": "Обновление данных пользователя (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1303,6 +1275,9 @@
         "ds.UserDTO": {
             "type": "object",
             "properties": {
+                "full_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1332,10 +1307,14 @@
         "ds.UserRegisterRequest": {
             "type": "object",
             "required": [
+                "full_name",
                 "password",
                 "username"
             ],
             "properties": {
+                "full_name": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -1347,6 +1326,9 @@
         "ds.UserUpdateRequest": {
             "type": "object",
             "properties": {
+                "full_name": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },

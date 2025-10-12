@@ -30,7 +30,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Аутентификация пользователя",
+                "summary": "Аутентификация пользователя (все)",
                 "parameters": [
                     {
                         "description": "Учетные данные пользователя",
@@ -81,7 +81,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Выход из системы (деавторизация)",
+                "summary": "Выход из системы (авторизованный пользователь)",
                 "responses": {
                     "200": {
                         "description": "Сообщение об успехе",
@@ -106,23 +106,18 @@ const docTemplate = `{
         },
         "/factors": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Возвращает постраничный список факторов риска. Доступен для всех авторизованных пользователей.",
+                "description": "Возвращает постраничный список факторов риска.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "factors"
                 ],
-                "summary": "Получить список факторов",
+                "summary": "Получить список факторов (все)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Фильтр по названию фактора (поиск по подстроке)",
+                        "description": "Фильтр по названию фактора",
                         "name": "title",
                         "in": "query"
                     }
@@ -132,15 +127,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/ds.PaginatedResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Необходима авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
                         }
                     },
                     "500": {
@@ -160,7 +146,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Создает новую запись о факторе риска. Доступно только для модераторов.",
+                "description": "Создает новую запись о факторе риска.",
                 "consumes": [
                     "application/json"
                 ],
@@ -221,11 +207,6 @@ const docTemplate = `{
         },
         "/factors/{id}": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Возвращает детальную информацию о факторе риска.",
                 "produces": [
                     "application/json"
@@ -233,7 +214,7 @@ const docTemplate = `{
                 "tags": [
                     "factors"
                 ],
-                "summary": "Получить один фактор по ID",
+                "summary": "Получить один фактор по ID (все)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -248,15 +229,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/ds.FactorDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "Необходима авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
                         }
                     },
                     "404": {
@@ -474,7 +446,7 @@ const docTemplate = `{
                 "tags": [
                     "frax"
                 ],
-                "summary": "Получить список заявок",
+                "summary": "Получить список заявок (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -531,7 +503,7 @@ const docTemplate = `{
                 "tags": [
                     "frax"
                 ],
-                "summary": "Получить информацию для иконки корзины",
+                "summary": "Получить информацию для иконки корзины (авторизованный пользователь)",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -560,9 +532,9 @@ const docTemplate = `{
                 ],
                 "description": "Находит или создает черновик заявки для текущего пользователя и добавляет в него фактор.",
                 "tags": [
-                    "frax"
+                    "factors"
                 ],
-                "summary": "Добавить фактор в черновик заявки",
+                "summary": "Добавить фактор в черновик заявки (все)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -617,7 +589,7 @@ const docTemplate = `{
                 "tags": [
                     "frax"
                 ],
-                "summary": "Получить одну заявку по ID",
+                "summary": "Получить одну заявку по ID (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -667,7 +639,7 @@ const docTemplate = `{
                 "tags": [
                     "frax"
                 ],
-                "summary": "Обновить данные заявки",
+                "summary": "Обновить данные заявки (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -711,7 +683,7 @@ const docTemplate = `{
                 "tags": [
                     "frax"
                 ],
-                "summary": "Удалить заявку",
+                "summary": "Удалить заявку (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -749,9 +721,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "frax"
+                    "m-m"
                 ],
-                "summary": "Обновить описание фактора в заявке",
+                "summary": "Обновить описание фактора в заявке (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -800,9 +772,9 @@ const docTemplate = `{
                 ],
                 "description": "Удаляет связь между заявкой и фактором.",
                 "tags": [
-                    "frax"
+                    "m-m"
                 ],
-                "summary": "Удалить фактор из заявки",
+                "summary": "Удалить фактор из заявки (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -846,7 +818,7 @@ const docTemplate = `{
                 "tags": [
                     "frax"
                 ],
-                "summary": "Сформировать заявку",
+                "summary": "Сформировать заявку (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -951,7 +923,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Регистрация нового пользователя",
+                "summary": "Регистрация нового пользователя (все)",
                 "parameters": [
                     {
                         "description": "Данные для регистрации",
@@ -1005,7 +977,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Получение данных пользователя по ID",
+                "summary": "Получение данных пользователя по ID (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1055,7 +1027,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Обновление данных пользователя",
+                "summary": "Обновление данных пользователя (авторизованный пользователь)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1309,6 +1281,9 @@ const docTemplate = `{
         "ds.UserDTO": {
             "type": "object",
             "properties": {
+                "full_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1338,10 +1313,14 @@ const docTemplate = `{
         "ds.UserRegisterRequest": {
             "type": "object",
             "required": [
+                "full_name",
                 "password",
                 "username"
             ],
             "properties": {
+                "full_name": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -1353,6 +1332,9 @@ const docTemplate = `{
         "ds.UserUpdateRequest": {
             "type": "object",
             "properties": {
+                "full_name": {
+                    "type": "string"
+                },
                 "password": {
                     "type": "string"
                 },

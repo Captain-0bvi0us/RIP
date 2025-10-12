@@ -36,11 +36,15 @@ func (r *Repository) GetFraxWithFactors(fraxID uint) (*ds.FraxSearching, error) 
 }
 
 // GET /api/frax - список заявок с фильтрацией
-func (r *Repository) FraxListFiltered(status, from, to string) ([]ds.FraxDTO, error) {
+func (r *Repository) FraxListFiltered(userID uint, isModerator bool, status, from, to string) ([]ds.FraxDTO, error) {
 	var fraxList []ds.FraxSearching
 	query := r.db.Preload("Creator").Preload("Moderator")
 
 	query = query.Where("status != ? AND status != ?", ds.StatusDeleted, ds.StatusDraft)
+
+	if !isModerator {
+		query = query.Where("creator_id = ?", userID)
+	}
 
 	if status != "" {
 		if statusInt, err := strconv.Atoi(status); err == nil {

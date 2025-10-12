@@ -11,14 +11,12 @@ import (
 // GET /api/factors - список факторов с фильтрацией
 
 // GetFactors godoc
-// @Summary      Получить список факторов
-// @Description  Возвращает постраничный список факторов риска. Доступен для всех авторизованных пользователей.
+// @Summary      Получить список факторов (все)
+// @Description  Возвращает постраничный список факторов риска.
 // @Tags         factors
 // @Produce      json
-// @Security     ApiKeyAuth
-// @Param        title query string false "Фильтр по названию фактора (поиск по подстроке)"
+// @Param        title query string false "Фильтр по названию фактора"
 // @Success      200 {object} ds.PaginatedResponse
-// @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
 // @Router       /factors [get]
 func (h *Handler) GetFactors(c *gin.Context) {
@@ -51,14 +49,12 @@ func (h *Handler) GetFactors(c *gin.Context) {
 // GET /api/factors/:id - один фактор
 
 // GetFactor godoc
-// @Summary      Получить один фактор по ID
+// @Summary      Получить один фактор по ID (все)
 // @Description  Возвращает детальную информацию о факторе риска.
 // @Tags         factors
 // @Produce      json
-// @Security     ApiKeyAuth
 // @Param        id path int true "ID фактора"
 // @Success      200 {object} ds.FactorDTO
-// @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Failure      404 {object} map[string]string "Фактор не найден"
 // @Router       /factors/{id} [get]
 func (h *Handler) GetFactor(c *gin.Context) {
@@ -90,7 +86,7 @@ func (h *Handler) GetFactor(c *gin.Context) {
 
 // CreateFactor godoc
 // @Summary      Создать новый фактор (только модератор)
-// @Description  Создает новую запись о факторе риска. Доступно только для модераторов.
+// @Description  Создает новую запись о факторе риска.
 // @Tags         factors
 // @Accept       json
 // @Produce      json
@@ -213,9 +209,9 @@ func (h *Handler) DeleteFactor(c *gin.Context) {
 // POST /api/frax/draft/factors/:factor_id - добавление фактора в черновик
 
 // AddFactorToDraft godoc
-// @Summary      Добавить фактор в черновик заявки
+// @Summary      Добавить фактор в черновик заявки (все)
 // @Description  Находит или создает черновик заявки для текущего пользователя и добавляет в него фактор.
-// @Tags         frax
+// @Tags         factors
 // @Security     ApiKeyAuth
 // @Param        factor_id path int true "ID фактора для добавления"
 // @Success      201 {object} map[string]string "Сообщение об успехе"
