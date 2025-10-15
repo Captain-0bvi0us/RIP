@@ -42,7 +42,7 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 
 		// Заявки
 		auth.POST("/frax/draft/factors/:factor_id", h.AddFactorToDraft)
-		auth.GET("/frax/cart", h.GetCartBadge)
+		auth.GET("/frax/factorscart", h.GetCartBadge)
 		auth.GET("/frax", h.ListFrax)
 		auth.GET("/frax/:id", h.GetFrax)
 		auth.PUT("/frax/:id", h.UpdateFrax)

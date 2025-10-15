@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// GET /api/frax/cart - иконка корзины
+// GET /api/frax/factorscart - иконка корзины
 
 // GetCartBadge godoc
 // @Summary      Получить информацию для иконки корзины (авторизованный пользователь)
@@ -19,7 +19,7 @@ import (
 // @Security     ApiKeyAuth
 // @Success      200 {object} ds.CartBadgeDTO
 // @Failure      401 {object} map[string]string "Необходима авторизация"
-// @Router       /frax/cart [get]
+// @Router       /frax/factorscart [get]
 func (h *Handler) GetCartBadge(c *gin.Context) {
 	userID, err := getUserIDFromContext(c)
 	if err != nil {

@@ -702,28 +702,6 @@ paths:
       summary: Завершить или отклонить заявку (только модератор)
       tags:
       - frax
-  /frax/cart:
-    get:
-      description: Возвращает ID черновика текущего пользователя и количество факторов
-        в нем.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ds.CartBadgeDTO'
-        "401":
-          description: Необходима авторизация
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Получить информацию для иконки корзины (авторизованный пользователь)
-      tags:
-      - frax
   /frax/draft/factors/{factor_id}:
     post:
       description: Находит или создает черновик заявки для текущего пользователя и
@@ -758,6 +736,28 @@ paths:
       summary: Добавить фактор в черновик заявки (все)
       tags:
       - factors
+  /frax/factorscart:
+    get:
+      description: Возвращает ID черновика текущего пользователя и количество факторов
+        в нем.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.CartBadgeDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить информацию для иконки корзины (авторизованный пользователь)
+      tags:
+      - frax
   /users:
     post:
       consumes:

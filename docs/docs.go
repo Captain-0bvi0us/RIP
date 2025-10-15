@@ -489,40 +489,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/frax/cart": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Возвращает ID черновика текущего пользователя и количество факторов в нем.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "frax"
-                ],
-                "summary": "Получить информацию для иконки корзины (авторизованный пользователь)",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ds.CartBadgeDTO"
-                        }
-                    },
-                    "401": {
-                        "description": "Необходима авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/frax/draft/factors/{factor_id}": {
             "post": {
                 "security": [
@@ -565,6 +531,40 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/frax/factorscart": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Возвращает ID черновика текущего пользователя и количество факторов в нем.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "frax"
+                ],
+                "summary": "Получить информацию для иконки корзины (авторизованный пользователь)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ds.CartBadgeDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Необходима авторизация",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
