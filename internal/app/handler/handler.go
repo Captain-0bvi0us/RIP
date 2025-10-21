@@ -39,7 +39,6 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		auth.POST("/auth/logout", h.Logout)
 		auth.GET("/users/:id", h.GetUserData)
 		auth.PUT("/users/:id", h.UpdateUserData)
-
 		// Заявки
 		auth.POST("/frax/draft/factors/:factor_id", h.AddFactorToDraft)
 		auth.GET("/frax/factorscart", h.GetCartBadge)
