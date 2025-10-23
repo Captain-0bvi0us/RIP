@@ -26,6 +26,7 @@ func (r *Repository) FactorsList(title string) ([]ds.Factors, int64, error) {
 	if title != "" {
 		query = query.Where("title ILIKE ?", "%"+title+"%")
 	}
+
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -33,6 +34,10 @@ func (r *Repository) FactorsList(title string) ([]ds.Factors, int64, error) {
 	factorsQuery := query.Order("id asc")
 	if err := factorsQuery.Find(&factors).Error; err != nil {
 		return nil, 0, err
+	}
+
+	if factors == nil {
+		factors = []ds.Factors{}
 	}
 
 	return factors, total, nil
