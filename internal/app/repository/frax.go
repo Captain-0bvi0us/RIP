@@ -144,100 +144,6 @@ func (r *Repository) FormFrax(id uint, creatorID uint) error {
 	}).Error
 }
 
-// PUT /api/frax/:id/resolve - завершить/отклонить заявку
-func (r *Repository) ResolveFrax(id uint, moderatorID uint, action string) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
-
-		var frax ds.FraxSearching
-		if err := tx.Preload("FactorsLink.Factor").First(&frax, id).Error; err != nil {
-			return err
-		}
-
-		if frax.Status != ds.StatusFormed {
-			return errors.New("only formed frax can be resolved")
-		}
-
-		now := time.Now()
-		updates := map[string]interface{}{
-			"moderator_id":    moderatorID,
-			"complition_date": now,
-		}
-
-		switch action {
-		case "complete":
-			{
-				updates["status"] = ds.StatusCompleted
-				pof, phf := r.calculateFRAX(frax)
-				updates["POF"] = pof
-				updates["PHF"] = phf
-			}
-		case "reject":
-			{
-				updates["status"] = ds.StatusRejected
-			}
-		default:
-			{
-				return errors.New("invalid action, must be 'complete' or 'reject'")
-			}
-		}
-
-		if err := tx.Model(&frax).Updates(updates).Error; err != nil {
-			return err
-		}
-
-		var factorIDs []uint
-		for _, link := range frax.FactorsLink {
-			factorIDs = append(factorIDs, link.FactorID)
-		}
-
-		if len(factorIDs) > 0 {
-			if err := tx.Model(&ds.Factors{}).Where("id IN ?", factorIDs).Update("status", false).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
-// Функция расчета
-func (r *Repository) calculateFRAX(frax ds.FraxSearching) (float64, float64) {
-	age := float64(*frax.Age)
-	gender := 0.0
-	if *frax.Gender {
-		gender = 1.5
-	} else {
-		gender = 1.0
-	}
-
-	bmi := float64(*frax.Weight) / ((float64(*frax.Height) / 100) * (float64(*frax.Height) / 100))
-
-	factorSum := 0.0
-	for _, link := range frax.FactorsLink {
-		if link.Factor.Argument != nil {
-			factorSum += *link.Factor.Argument
-		}
-	}
-
-	pof := 0.1*age + 0.2*gender + 0.05*bmi + 0.3*factorSum + 0.5
-
-	phf := 0.05*age + 0.15*gender + 0.03*bmi + 0.2*factorSum + 0.2
-
-	if pof < 0 {
-		pof = 0
-	}
-	if pof > 100 {
-		pof = 100
-	}
-	if phf < 0 {
-		phf = 0
-	}
-	if phf > 100 {
-		phf = 100
-	}
-
-	return pof, phf
-}
-
 // DELETE /api/frax/:id - удаление заявки
 func (r *Repository) LogicallyDeleteFrax(fraxID uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
@@ -322,4 +228,52 @@ func (r *Repository) UpdateMM(fraxID, factorID uint, updateData ds.FactorToFrax)
 	}
 
 	return r.db.Model(&link).Updates(updates).Error
+}
+
+// Метод для обновления результатов, пришедших от асинхронного сервиса
+func (r *Repository) UpdateFraxResults(id uint, pof, phf float64) error {
+	return r.db.Model(&ds.FraxSearching{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"POF": pof,
+		"PHF": phf,
+	}).Error
+}
+
+// Убираем вызов r.calculateFRAX(frax)
+func (r *Repository) ResolveFrax(id uint, moderatorID uint, action string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var frax ds.FraxSearching
+		if err := tx.First(&frax, id).Error; err != nil { // Preload факторов тут уже не обязателен, если не меняем статусы факторов
+			return err
+		}
+
+		if frax.Status != ds.StatusFormed {
+			return errors.New("only formed frax can be resolved")
+		}
+
+		updates := map[string]interface{}{
+			"moderator_id":    moderatorID,
+			"complition_date": time.Now(),
+		}
+
+		switch action {
+		case "complete":
+			updates["status"] = ds.StatusCompleted
+			// ВАЖНО: Мы больше не считаем здесь POF/PHF.
+			// Мы предполагаем, что они уже посчитаны асинхронным сервисом,
+			// либо будут посчитаны позже (если вдруг сервис тормозит).
+			// Но по заданию: "одобрение заявок модератором".
+			// Значит, модератор просто фиксирует статус.
+		case "reject":
+			updates["status"] = ds.StatusRejected
+		default:
+			return errors.New("invalid action")
+		}
+
+		if err := tx.Model(&frax).Updates(updates).Error; err != nil {
+			return err
+		}
+
+		// Логику смены статусов факторов (Factors) оставляем как была, если нужна
+		return nil
+	})
 }

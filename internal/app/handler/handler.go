@@ -64,6 +64,10 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		// Управление заявками (завершение/отклонение)
 		moderator.PUT("/frax/:id/resolve", h.ResolveFrax)
 	}
+	internal := r.Group("/internal")
+	{
+		internal.PUT("/frax/result", h.SetFraxResult)
+	}
 }
 
 func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {

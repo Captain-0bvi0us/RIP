@@ -2,6 +2,8 @@ package handler
 
 import (
 	"RIP/internal/app/ds"
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -185,85 +187,6 @@ func (h *Handler) UpdateFrax(c *gin.Context) {
 	})
 }
 
-// PUT /api/frax/:id/form - сформировать заявку
-
-// FormFrax godoc
-// @Summary      Сформировать заявку (авторизованный пользователь)
-// @Description  Переводит заявку из статуса "черновик" в "сформирована".
-// @Tags         frax
-// @Security     ApiKeyAuth
-// @Param        id path int true "ID заявки (черновика)"
-// @Success      204 "No Content"
-// @Failure      400 {object} map[string]string "Не все поля заполнены"
-// @Failure      401 {object} map[string]string "Необходима авторизация"
-// @Router       /frax/{id}/form [put]
-func (h *Handler) FormFrax(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		h.errorHandler(c, http.StatusBadRequest, err)
-		return
-	}
-
-	userID, err := getUserIDFromContext(c)
-	if err != nil {
-		h.errorHandler(c, http.StatusUnauthorized, err)
-		return
-	}
-
-	if err := h.Repository.FormFrax(uint(id), userID); err != nil {
-		h.errorHandler(c, http.StatusBadRequest, err)
-		return
-	}
-
-	c.JSON(http.StatusNoContent, gin.H{
-		"message": "Заявка сформирована",
-	})
-}
-
-// PUT /api/frax/:id/resolve - завершить/отклонить заявку
-
-// ResolveFrax godoc
-// @Summary      Завершить или отклонить заявку (только модератор)
-// @Description  Модератор завершает (с расчетом) или отклоняет заявку.
-// @Tags         frax
-// @Accept       json
-// @Security     ApiKeyAuth
-// @Param        id path int true "ID заявки"
-// @Param        action body ds.FraxResolveRequest true "Действие: 'complete' или 'reject'"
-// @Success      204 "No Content"
-// @Failure      401 {object} map[string]string "Необходима авторизация"
-// @Failure      403 {object} map[string]string "Доступ запрещен"
-// @Router       /frax/{id}/resolve [put]
-func (h *Handler) ResolveFrax(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		h.errorHandler(c, http.StatusBadRequest, err)
-		return
-	}
-
-	var req ds.FraxResolveRequest
-	if err := c.BindJSON(&req); err != nil {
-		h.errorHandler(c, http.StatusBadRequest, err)
-		return
-	}
-
-	userID, err := getUserIDFromContext(c)
-	if err != nil {
-		h.errorHandler(c, http.StatusUnauthorized, err)
-		return
-	}
-
-	moderatorID := uint(userID)
-	if err := h.Repository.ResolveFrax(uint(id), moderatorID, req.Action); err != nil {
-		h.errorHandler(c, http.StatusBadRequest, err)
-		return
-	}
-
-	c.JSON(http.StatusNoContent, gin.H{
-		"message": "Заявка обработана модератором",
-	})
-}
-
 // DELETE /api/frax/:id - удаление заявки
 
 // DeleteFrax godoc
@@ -372,4 +295,162 @@ func (h *Handler) UpdateMM(c *gin.Context) {
 	c.JSON(http.StatusNoContent, gin.H{
 		"message": "Дополнительная информация к фаткору обновлена",
 	})
+}
+
+// PUT /api/internal/frax/result
+func (h *Handler) SetFraxResult(c *gin.Context) {
+	// 1. Псевдо-авторизация
+	token := c.GetHeader("Authorization")
+	// В реальном коде берите токен из конфига h.Config.InternalAuthToken
+	// Для простоты пока хардкод или добавьте поле в структуру Handler
+	expectedToken := "secret12"
+
+	if token != expectedToken {
+		c.JSON(http.StatusForbidden, gin.H{"error": "invalid token"})
+		return
+	}
+
+	// 2. Парсинг тела запроса
+	var res ds.AsyncCalcResponse
+	if err := c.BindJSON(&res); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// 3. Сохранение в БД
+	if err := h.Repository.UpdateFraxResults(res.ID, res.POF, res.PHF); err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "results updated"})
+}
+
+// PUT /api/frax/:id/form - сформировать заявку
+
+// FormFrax godoc
+// @Summary      Сформировать заявку (авторизованный пользователь)
+// @Description  Переводит заявку из статуса "черновик" в "сформирована".
+// @Tags         frax
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки (черновика)"
+// @Success      204 "No Content"
+// @Failure      400 {object} map[string]string "Не все поля заполнены"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /frax/{id}/form [put]
+
+func (h *Handler) FormFrax(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	// Просто меняем статус на "Сформирована" (Formed)
+	// Расчет больше НЕ запускаем здесь
+	if err := h.Repository.FormFrax(uint(id), userID); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Заявка сформирована и отправлена модератору",
+	})
+}
+
+// PUT /api/frax/:id/resolve - завершить/отклонить заявку
+
+// ResolveFrax godoc
+// @Summary      Завершить или отклонить заявку (только модератор)
+// @Description  Модератор завершает (с расчетом) или отклоняет заявку.
+// @Tags         frax
+// @Accept       json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        action body ds.FraxResolveRequest true "Действие: 'complete' или 'reject'"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /frax/{id}/resolve [put]
+
+func (h *Handler) ResolveFrax(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var req ds.FraxResolveRequest
+	if err := c.BindJSON(&req); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+	moderatorID := uint(userID)
+
+	// 1. Сначала меняем статус в БД (Complete или Reject)
+	if err := h.Repository.ResolveFrax(uint(id), moderatorID, req.Action); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// 2. Если действие "complete" (Принять) — запускаем асинхронный расчет
+	if req.Action == "complete" {
+		// Нам нужно получить полные данные заявки для отправки в Python
+		fraxFull, err := h.Repository.GetFraxWithFactors(uint(id))
+		if err == nil {
+			// Считаем сумму аргументов факторов
+			factorSum := 0.0
+			for _, link := range fraxFull.FactorsLink {
+				if link.Factor.Argument != nil {
+					factorSum += *link.Factor.Argument
+				}
+			}
+
+			// Подготавливаем данные
+			reqData := ds.AsyncCalcRequest{
+				ID:        fraxFull.ID,
+				Age:       *fraxFull.Age,
+				Gender:    *fraxFull.Gender,
+				Weight:    *fraxFull.Weight,
+				Height:    *fraxFull.Height,
+				FactorSum: factorSum,
+			}
+
+			// Отправляем в Python (в фоновом режиме)
+			// Убедись, что URL правильный (h.Config.AsyncServiceUrl или хардкод для теста)
+			go sendAsyncCalculation("http://localhost:8000/api/calc/", reqData)
+		} else {
+			logrus.Errorf("Failed to fetch frax data for async calc: %v", err)
+		}
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Заявка обработана модератором",
+	})
+}
+
+// Вспомогательная функция (если её не было, добавь в конец файла или используй существующую)
+func sendAsyncCalculation(url string, data ds.AsyncCalcRequest) {
+	jsonData, _ := json.Marshal(data)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		logrus.Errorf("Failed to send async calc request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		logrus.Errorf("Async service returned non-200 status: %d", resp.StatusCode)
+	}
 }
