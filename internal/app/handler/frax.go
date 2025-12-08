@@ -416,7 +416,7 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 				FactorSum: factorSum,
 			}
 
-			go sendAsyncCalculation("http://localhost:8000/api/calc/", reqData)
+			go sendAsyncCalculation("http://localhost:8000/api/calculate_probability/", reqData)
 		} else {
 			logrus.Errorf("Failed to fetch frax data for async calc: %v", err)
 		}

@@ -66,7 +66,7 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 	}
 	internal := r.Group("/internal")
 	{
-		internal.PUT("/frax/result", h.SetFraxResult)
+		internal.PUT("/frax/updating", h.SetFraxResult)
 	}
 }
 
