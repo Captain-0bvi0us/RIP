@@ -103,7 +103,6 @@ type PaginatedResponse struct {
 	Total int64       `json:"total"`
 }
 
-// Данные, которые мы отправляем в Python сервис
 type AsyncCalcRequest struct {
 	ID        uint    `json:"id"`
 	Age       int     `json:"age"`
@@ -113,7 +112,6 @@ type AsyncCalcRequest struct {
 	FactorSum float64 `json:"factor_sum"`
 }
 
-// Данные, которые мы получаем от Python сервиса (Callback)
 type AsyncCalcResponse struct {
 	ID  uint    `json:"id"`
 	POF float64 `json:"POF"`

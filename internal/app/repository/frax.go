@@ -230,7 +230,6 @@ func (r *Repository) UpdateMM(fraxID, factorID uint, updateData ds.FactorToFrax)
 	return r.db.Model(&link).Updates(updates).Error
 }
 
-// Метод для обновления результатов, пришедших от асинхронного сервиса
 func (r *Repository) UpdateFraxResults(id uint, pof, phf float64) error {
 	return r.db.Model(&ds.FraxSearching{}).Where("id = ?", id).Updates(map[string]interface{}{
 		"POF": pof,
@@ -238,11 +237,10 @@ func (r *Repository) UpdateFraxResults(id uint, pof, phf float64) error {
 	}).Error
 }
 
-// Убираем вызов r.calculateFRAX(frax)
 func (r *Repository) ResolveFrax(id uint, moderatorID uint, action string) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var frax ds.FraxSearching
-		if err := tx.First(&frax, id).Error; err != nil { // Preload факторов тут уже не обязателен, если не меняем статусы факторов
+		if err := tx.First(&frax, id).Error; err != nil {
 			return err
 		}
 
@@ -258,11 +256,6 @@ func (r *Repository) ResolveFrax(id uint, moderatorID uint, action string) error
 		switch action {
 		case "complete":
 			updates["status"] = ds.StatusCompleted
-			// ВАЖНО: Мы больше не считаем здесь POF/PHF.
-			// Мы предполагаем, что они уже посчитаны асинхронным сервисом,
-			// либо будут посчитаны позже (если вдруг сервис тормозит).
-			// Но по заданию: "одобрение заявок модератором".
-			// Значит, модератор просто фиксирует статус.
 		case "reject":
 			updates["status"] = ds.StatusRejected
 		default:
@@ -272,8 +265,6 @@ func (r *Repository) ResolveFrax(id uint, moderatorID uint, action string) error
 		if err := tx.Model(&frax).Updates(updates).Error; err != nil {
 			return err
 		}
-
-		// Логику смены статусов факторов (Factors) оставляем как была, если нужна
 		return nil
 	})
 }

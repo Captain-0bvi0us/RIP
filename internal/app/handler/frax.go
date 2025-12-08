@@ -299,10 +299,7 @@ func (h *Handler) UpdateMM(c *gin.Context) {
 
 // PUT /api/internal/frax/result
 func (h *Handler) SetFraxResult(c *gin.Context) {
-	// 1. Псевдо-авторизация
 	token := c.GetHeader("Authorization")
-	// В реальном коде берите токен из конфига h.Config.InternalAuthToken
-	// Для простоты пока хардкод или добавьте поле в структуру Handler
 	expectedToken := "secret12"
 
 	if token != expectedToken {
@@ -310,14 +307,12 @@ func (h *Handler) SetFraxResult(c *gin.Context) {
 		return
 	}
 
-	// 2. Парсинг тела запроса
 	var res ds.AsyncCalcResponse
 	if err := c.BindJSON(&res); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// 3. Сохранение в БД
 	if err := h.Repository.UpdateFraxResults(res.ID, res.POF, res.PHF); err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
@@ -352,8 +347,6 @@ func (h *Handler) FormFrax(c *gin.Context) {
 		return
 	}
 
-	// Просто меняем статус на "Сформирована" (Formed)
-	// Расчет больше НЕ запускаем здесь
 	if err := h.Repository.FormFrax(uint(id), userID); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
@@ -399,18 +392,14 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 	}
 	moderatorID := uint(userID)
 
-	// 1. Сначала меняем статус в БД (Complete или Reject)
 	if err := h.Repository.ResolveFrax(uint(id), moderatorID, req.Action); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// 2. Если действие "complete" (Принять) — запускаем асинхронный расчет
 	if req.Action == "complete" {
-		// Нам нужно получить полные данные заявки для отправки в Python
 		fraxFull, err := h.Repository.GetFraxWithFactors(uint(id))
 		if err == nil {
-			// Считаем сумму аргументов факторов
 			factorSum := 0.0
 			for _, link := range fraxFull.FactorsLink {
 				if link.Factor.Argument != nil {
@@ -418,7 +407,6 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 				}
 			}
 
-			// Подготавливаем данные
 			reqData := ds.AsyncCalcRequest{
 				ID:        fraxFull.ID,
 				Age:       *fraxFull.Age,
@@ -428,8 +416,6 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 				FactorSum: factorSum,
 			}
 
-			// Отправляем в Python (в фоновом режиме)
-			// Убедись, что URL правильный (h.Config.AsyncServiceUrl или хардкод для теста)
 			go sendAsyncCalculation("http://localhost:8000/api/calc/", reqData)
 		} else {
 			logrus.Errorf("Failed to fetch frax data for async calc: %v", err)
@@ -441,7 +427,6 @@ func (h *Handler) ResolveFrax(c *gin.Context) {
 	})
 }
 
-// Вспомогательная функция (если её не было, добавь в конец файла или используй существующую)
 func sendAsyncCalculation(url string, data ds.AsyncCalcRequest) {
 	jsonData, _ := json.Marshal(data)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
