@@ -74,6 +74,9 @@ func (r *Repository) UpdateFactor(id uint, req ds.FactorUpdateRequest) (*ds.Fact
 	if req.Argument != nil {
 		factor.Argument = req.Argument
 	}
+	if req.Image != nil {
+		factor.Image = req.Image
+	}
 
 	if err := r.db.Save(&factor).Error; err != nil {
 		return nil, err

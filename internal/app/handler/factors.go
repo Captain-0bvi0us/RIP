@@ -111,6 +111,7 @@ func (h *Handler) CreateFactor(c *gin.Context) {
 		Text:     req.Text,
 		Argument: req.Argument,
 		Status:   &statusValue,
+		Image:    req.Image,
 	}
 
 	if err := h.Repository.CreateFactor(&factor); err != nil {

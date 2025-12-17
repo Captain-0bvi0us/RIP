@@ -15,12 +15,14 @@ type FactorCreateRequest struct {
 	Title    string   `json:"title" binding:"required"`
 	Text     string   `json:"text" binding:"required"`
 	Argument *float64 `json:"argument"`
+	Image    *string  `json:"image"`
 }
 
 type FactorUpdateRequest struct {
 	Title    *string  `json:"title"`
 	Text     *string  `json:"text"`
 	Argument *float64 `json:"argument"`
+	Image    *string  `json:"image"`
 }
 
 type FraxDTO struct {
